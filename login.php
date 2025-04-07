@@ -1,21 +1,45 @@
 <?php
 session_start();
-include 'dbconnect.php';
+require_once 'dbconnect.php';
 
-$email = $_POST['email'];
-$password = $_POST['password'];
+// Get form data
+$email = $_POST['email'] ?? '';
+$password = $_POST['password'] ?? '';
 
-// Direct check against database (no hashing)
-$query = "SELECT a_id FROM admin WHERE email='$email' AND password='$password'";
-$result = $conn->query($query);
-
-if ($result->num_rows === 1) {
-    $_SESSION['admin_id'] = $result->fetch_assoc()['a_id'];
-    header("Location: templates/admin.html");
-
+// Basic validation
+if (empty($email) || empty($password)) {
+    header("Location: index.html?error=empty_fields");
     exit();
-} else {
-    header("Location: index.php?error=Invalid email or password");
+}
+
+try {
+    // Check admin credentials
+    $stmt = $conn->prepare("SELECT a_id, email, password FROM admin WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        $admin = $result->fetch_assoc();
+        
+        // Compare plain text passwords
+        if ($password === $admin['password']) {
+            // Set session variables
+            $_SESSION['admin_id'] = $admin['a_id'];
+            $_SESSION['admin_email'] = $admin['email'];
+            
+            // Redirect to admin page
+            header("Location: templates/admin.html");
+            exit();
+        }
+    }
+    
+    // If we get here, credentials were invalid
+    header("Location: index.html?error=invalid_credentials");
+    exit();
+    
+} catch (Exception $e) {
+    header("Location: index.html?error=database_error");
     exit();
 }
 ?>
