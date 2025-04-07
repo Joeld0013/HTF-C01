@@ -2,101 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - NeuroSchedule</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}" />
 </head>
 <body>
-  <div class="dashboard">
-    <div class="sidebar">
+  <div class="container">
+    <nav class="sidebar">
       <h2>Admin Panel</h2>
-      <a href="#" class="nav-link active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="#" class="nav-link" data-section="employees"><i class="fas fa-users"></i> Employees</a>
-      <a href="#" class="nav-link" data-section="profile"><i class="fas fa-user"></i> Profile</a>
-    </div>
+      <ul>
+        <li><a href="#" class="nav-link active" onclick="showSection('dashboard')">Dashboard</a></li>
+        <li><a href="#" class="nav-link" onclick="showSection('employees')">Employees</a></li>
+        <li><a href="#" class="nav-link" onclick="showSection('profile')">Profile</a></li>
+      </ul>
+    </nav>
 
-    <div class="content">
-      <!-- Dashboard Section -->
-      <div class="section" id="dashboard-section">
-        <h2>Welcome to Admin Dashboard</h2>
-        <p>Monitor your workforce and operations here.</p>
-      </div>
+    <main class="main-content">
+      <section id="dashboard" class="section active">
+        <h1>Dashboard</h1>
+        <p>Welcome to the admin dashboard.</p>
+      </section>
 
-      <!-- Employees Section -->
-      <div class="section" id="employees-section" style="display:none;">
-        <div class="section-header">
-          <h2>Employee Management</h2>
-          <button class="add-btn" id="addEmployeeBtn">
-            <i class="fas fa-plus"></i> Add Employee
-          </button>
-        </div>
-        <div class="employee-table-container">
-          <table class="employee-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Join Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Rows will be inserted here by JavaScript -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <section id="employees" class="section">
+        <h1>Employees</h1>
+        <button class="btn" onclick="openModal()">Add New Employee</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Sl No</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          <tbody id="employee-table-body"></tbody>
+        </table>
+      </section>
 
-      <!-- Profile Section -->
-      <div class="section" id="profile-section" style="display:none;">
-        <h2>Admin Profile</h2>
-        <p>Manage your personal and account settings here.</p>
-      </div>
+      <section id="profile" class="section">
+        <h1>Profile</h1>
+        <p>Manage your admin profile here.</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="employeeModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Add New Employee</h2>
+      <form id="employeeForm" method="POST" action="/add_employee">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="role">Role:</label>
+        <select id="role" name="role" required>
+          <option value="">-- Select Role --</option>
+          <option value="Site Supervisor / Foreman">Site Supervisor / Foreman</option>
+          <option value="General Laborer">General Laborer</option>
+          <option value="Electrician">Electrician</option>
+          <option value="Plumber">Plumber</option>
+          <option value="Carpenter">Carpenter</option>
+          <option value="Mason">Mason</option>
+          <option value="Welder">Welder</option>
+          <option value="Crane Operator / Heavy Equipment Operator">Crane Operator / Heavy Equipment Operator</option>
+          <option value="Truck Driver / Material Transporter">Truck Driver / Material Transporter</option>
+          <option value="Security Guard">Security Guard</option>
+        </select>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" readonly />
+
+        <label for="password">Password:</label>
+        <input type="text" id="password" name="password" readonly />
+
+        <button type="submit" class="btn">Add Employee</button>
+      </form>
     </div>
   </div>
 
-  <!-- Employee Modal -->
-  <div class="modal-overlay" id="employeeModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Add New Employee</h3>
-        <button class="close-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="employeeForm">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="employeeEmail" readonly>
-          </div>
-          <div class="form-group">
-            <label>Default Password</label>
-            <input type="text" id="employeePassword" readonly>
-          </div>
-          <div class="form-group">
-            <label>Role</label>
-            <select id="employeeRole" required>
-              <option value="" disabled selected>Select Role</option>
-              <option value="Developer">Developer</option>
-              <option value="Manager">Manager</option>
-              <option value="HR">HR</option>
-              <option value="Intern">Intern</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="cancel-btn" id="cancelEmployee">Cancel</button>
-            <button type="submit" class="submit-btn">Create Employee</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <script src="static/admin.js"></script>
+  <script src="{{ url_for('static', filename='admin.js') }}"></script>
 </body>
 </html>
