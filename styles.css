@@ -1,0 +1,274 @@
+/* Font & Reset */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(90deg, 
+        rgba(34, 102, 153, 0.1),  /* Lightest blue on far left (10% opacity) */
+        rgba(0, 91, 161, 0.6)   /* Strongest blue on far right (60% opacity) */
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Login Container */
+.login-container {
+   
+    
+    border-radius: 12px;
+    width: 380px;
+    padding: 40px;
+    text-align: center;
+    border: 1px solid #000000;
+    margin-right: 880px; /* Pushes container left */
+}
+
+.login-container {
+    /* Existing styles... */
+    border: 1px solid #000000;
+    position: relative; /* Needed for the pseudo-element */
+    overflow: hidden; /* Ensures the accent doesn't overflow */
+}
+
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #2C3E50; /* Dark navy blue */
+}
+
+.logo i {
+    color: #3498DB; /* Accent blue */
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    line-height: 1.4;
+    color: #2C3E50; /* Dark navy blue */
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #2C3E50; /* Dark navy blue */
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #D6DBDF;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: linear-gradient(90deg, 
+    rgba(34, 102, 153, 0.1),  /* Lightest blue on far left (10% opacity) */
+    rgba(101, 156, 198, 0.6)   /* Strongest blue on far right (60% opacity) */
+);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3498DB; /* Accent blue */
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #2e4e7e; /* Accent blue */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #2980B9; /* Darker blue on hover */
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #7F8C8D; /* Gray text */
+    font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #D6DBDF; /* Light border */
+}
+
+.divider::before {
+    margin-right: 10px;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+/* Role Selector */
+.role-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.role-option {
+    padding: 10px 20px;
+    border: 1px solid #D6DBDF;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    color: #2C3E50; /* Dark navy blue */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.role-option.active {
+    background-color: #2e4e7e;/* Dark navy blue */
+    color: white;
+    border-color: #2C3E50;
+}
+
+.role-option i {
+    font-size: 16px;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #7F8C8D; /* Gray color */
+    font-size: 16px;
+}
+
+.toggle-password:hover {
+    color: #2C3E50; /* Darker color on hover */
+}
+
+
+
+.welcome-title {
+    position: absolute;
+    right: 170px; /* Adjust position as needed */
+    top: 30%; /* Center vertically - adjust as needed */
+    transform: translateY(-50%);
+    color: black;
+    font-size: 2rem;
+    font-weight: 300;
+    text-align: right;
+    z-index: 1; /* Ensures it stays above the gradient */
+}
+
+.neuro-science {
+    font-family: 'Dancing Script', cursive; /* Elegant cursive font */
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: black;
+}
+
+.workforce-description {
+    position: absolute;
+    right: 275px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 300px;
+    color: #2C3E50; /* Dark navy from your theme */
+    font-family: 'Roboto', sans-serif; /* Matching your existing font */
+    line-height: 1.6;
+    z-index: 1;
+}
+
+.workforce-description h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #154D57; /* Your dark teal for consistency */
+}
+
+.workforce-description p {
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Footer Links */
+.footer-links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.footer-links a {
+    color: #3498DB; /* Accent blue */
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}   
+
+
+
