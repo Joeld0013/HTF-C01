@@ -1,4 +1,9 @@
 // Password toggle functionality
+const resetBtn = document.getElementById('resetPasswordBtn');
+
+
+
+
 document.getElementById('togglePassword').addEventListener('click', function() {
     const password = document.getElementById('password');
     const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -134,33 +139,56 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   
-    // Reset password
-    resetBtn.addEventListener('click', function() {
-      const newPass = document.getElementById('newPassword').value;
-      const confirmPass = document.getElementById('confirmPassword').value;
-      
-      if (!newPass || !confirmPass) {
+
+
+resetBtn.addEventListener('click', function() {
+    const newPass = document.getElementById('newPassword').value;
+    const confirmPass = document.getElementById('confirmPassword').value;
+    const email = document.getElementById('resetEmail').value; // get from input
+
+    const statusDiv = document.getElementById('resetStatus');
+
+    if (!newPass || !confirmPass) {
         statusDiv.textContent = 'Please fill in both fields';
         return;
-      }
-      
-      if (newPass !== confirmPass) {
+    }
+
+    if (newPass !== confirmPass) {
         statusDiv.textContent = 'Passwords do not match';
         return;
-      }
-      
-      if (newPass.length < 6) {
+    }
+
+    if (newPass.length < 6) {
         statusDiv.textContent = 'Password must be at least 6 characters';
         return;
-      }
-  
-      // In a real app, you would send this to your server
-      statusDiv.style.color = '#4CAF50';
-      statusDiv.textContent = 'Password reset successful!';
-      
-      // Close modal after 2 seconds
-      setTimeout(() => {
-        modal.style.display = 'none';
-      }, 2000);
+    }
+
+    // Send AJAX request to backend
+    fetch('reset_password.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(newPass)}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        statusDiv.style.color = data.success ? '#4CAF50' : '#d9534f';
+        statusDiv.textContent = data.message;
+
+        if (data.success) {
+            setTimeout(() => {
+                document.getElementById('forgotPasswordModal').style.display = 'none';
+                document.getElementById('resetEmail').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            }, 2000);
+        }
+    })
+    .catch(err => {
+        statusDiv.textContent = 'Error connecting to server.';
+        console.error(err);
     });
+});
+
   });
