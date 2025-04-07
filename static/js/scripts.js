@@ -1,71 +1,80 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('error-message');
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
+// Password toggle functionality
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const password = document.getElementById('password');
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+});
 
-    // Toggle password visibility
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.classList.toggle('fa-eye-slash');
-    });
+// Error popup functions
+function showError(message) {
+    const popup = document.getElementById('errorPopup');
+    document.getElementById('errorMessage').textContent = message;
+    popup.style.display = 'block';
+    setTimeout(hideError, 5000); // Auto-hide after 5 seconds
+}
 
-    // Form submission
-    loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Prevent default form submission
-        
-        // Get form values
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
+function hideError() {
+    document.getElementById('errorPopup').style.display = 'none';
+}
 
-        // Clear previous errors
-        errorMessage.style.display = 'none';
-        errorMessage.textContent = '';
+// Form submission
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-        // Client-side validation
-        if (!email || !password) {
-            showError('Please fill in all fields');
-            return;
-        }
-
-        if (!validateEmail(email)) {
-            showError('Please enter a valid email address');
-            return;
-        }
-
-        try {
-            const response = await fetch('login.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Redirect to admin page on success
-                window.location.href = 'templates/admin.html';
-            } else {
-                showError(result.message || 'Invalid email or password');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showError('An error occurred. Please try again.');
-        }
-    });
-
-    // Helper functions
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+    if (!email || !password) {
+        showError('Please fill in all fields');
+        return;
     }
 
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
+    try {
+        const response = await fetch('login.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = 'templates/admin.html';
+        } else {
+            showError(result.message || 'Invalid email or password');
+        }
+    } catch (error) {
+        showError('An error occurred. Please try again.');
+        console.error('Error:', error);
+    }
+});
+
+// Check for URL errors on page load
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    
+    if (error) {
+        let errorMessage = '';
+        switch (error) {
+            case 'empty_fields':
+                errorMessage = 'Please fill in all fields';
+                break;
+            case 'invalid_credentials':
+                errorMessage = 'Invalid email or password';
+                break;
+            case 'database_error':
+                errorMessage = 'Database error occurred';
+                break;
+            default:
+                errorMessage = 'Login failed';
+        }
+        showError(errorMessage);
+        // Clean the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
