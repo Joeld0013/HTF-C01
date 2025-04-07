@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul>
+        <li><a href="#" class="nav-link active" onclick="showSection('dashboard')">Dashboard</a></li>
+        <li><a href="#" class="nav-link" onclick="showSection('employees')">Employees</a></li>
+        <li><a href="#" class="nav-link" onclick="showSection('profile')">Profile</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <section id="dashboard" class="section active">
+        <h1>Dashboard</h1>
+        <p>Welcome to the admin dashboard.</p>
+      </section>
+
+      <section id="employees" class="section">
+        <h1>Employees</h1>
+        <button class="btn" onclick="openModal()">Add New Employee</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Sl No</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Password</th>
+              <th>Status</th>
+              <th>Created Time</th>
+              <th>Face Scan</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="employee-table-body">
+            <!-- Employee rows will be dynamically loaded here -->
+          </tbody>
+        </table>
+      </section>
+
+      <section id="profile" class="section">
+        <h1>Profile</h1>
+        <p>Manage your admin profile here.</p>
+      </section>
+    </main>
+  </div>
+<!-- Modal -->
+<div id="employeeModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>Add New Employee</h2>
+    
+    <!-- Role Selection Navbar -->
+    <div class="role-navbar">
+      <button type="button" class="role-btn" onclick="setRole('Site Supervisor / Foreman')">Supervisor</button>
+      <button type="button" class="role-btn" onclick="setRole('General Laborer')">Laborer</button>
+      <button type="button" class="role-btn" onclick="setRole('Electrician')">Electrician</button>
+      <button type="button" class="role-btn" onclick="setRole('Plumber')">Plumber</button>
+      <button type="button" class="role-btn" onclick="setRole('Carpenter')">Carpenter</button>
+      <button type="button" class="role-btn" onclick="setRole('Mason')">Mason</button>
+      <button type="button" class="role-btn" onclick="setRole('Welder')">Welder</button>
+      <button type="button" class="role-btn" onclick="setRole('Crane Operator / Heavy Equipment Operator')">Operator</button>
+      <button type="button" class="role-btn" onclick="setRole('Truck Driver / Material Transporter')">Driver</button>
+      <button type="button" class="role-btn" onclick="setRole('Security Guard')">Security</button>
+    </div>
+    
+    <form id="employeeForm">
+      <!-- ID Selection -->
+      <div class="id-selection">
+        <label>Employee ID:</label>
+        <div class="id-options">
+          <label>
+            <input type="radio" name="idOption" value="auto" checked onchange="toggleIdInput()"> Auto-increment
+          </label>
+        </div>
+        <input type="text" id="employeeId" name="employeeId" style="display:none;">
+      </div>
+
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="role">Role:</label>
+      <select id="role" name="role" required>
+        <option value="">-- Select Role --</option>
+        <option value="Site Supervisor / Foreman">Site Supervisor / Foreman</option>
+        <option value="General Laborer">General Laborer</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Plumber">Plumber</option>
+        <option value="Carpenter">Carpenter</option>
+        <option value="Mason">Mason</option>
+        <option value="Welder">Welder</option>
+        <option value="Crane Operator / Heavy Equipment Operator">Crane Operator / Heavy Equipment Operator</option>
+        <option value="Truck Driver / Material Transporter">Truck Driver / Material Transporter</option>
+        <option value="Security Guard">Security Guard</option>
+      </select>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" readonly />
+
+      <label for="password">Password:</label>
+      <input type="text" id="password" name="password" readonly />
+
+      <!-- Hidden Fields for DB -->
+      <input type="hidden" id="status" name="status" value="inactive">
+      <input type="hidden" id="created_time" name="created_time">
+      <input type="hidden" id="facescan" name="facescan" value="">
+
+      <button type="submit" class="btn">Add Employee</button>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Style for role navbar */
+  .role-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .role-btn {
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .role-btn:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Style for ID selection */
+  .id-selection {
+    margin-bottom: 15px;
+  }
+  
+  .id-options {
+    display: flex;
+    gap: 15px;
+    margin: 5px 0;
+  }
+</style>
+
+  <script src="admin.js" defer></script>
+</body>
+</html>
