@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorkforcePro | Login</title>
     <link rel="stylesheet" href="user.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Error Popup Styles */
         .error-popup {
             display: none;
             position: fixed;
@@ -33,13 +31,23 @@
             margin-left: 15px;
             cursor: pointer;
         }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <!-- Error Popup -->
     <div id="errorPopup" class="error-popup">
         <span id="errorMessage"></span>
-        <span class="close-popup" onclick="hideError()">&times;</span>
+        <span class="close-popup">&times;</span>
     </div>
 
     <div class="login-container">
@@ -61,8 +69,19 @@
                     <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
                 </div>
             </div>
+            <button type="submit" class="login-btn">Sign in</button>
             
-            <button type="submit" class="login-btn">(USER)Sign in</button>
+            <div class="divider">or</div>
+
+            <div class="footer-links">
+                <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                <a href="#">Contact support</a>
+            </div>
+        </form>
+        
+        <!-- Error message display -->
+        <div id="error-message" class="error-message"></div>
+    </div>
             
             <div class="divider">or</div>
 
@@ -87,6 +106,66 @@
         </p>
     </div>
 
-    <script src="scripts.js" defer></script>
+    <script>// Password toggle functionality
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+        
+        // Error handling functions
+        function showError(message) {
+            const popup = document.getElementById('errorPopup');
+            document.getElementById('errorMessage').textContent = message;
+            popup.style.display = 'block';
+            setTimeout(hideError, 5000);
+        }
+        
+        function hideError() {
+            document.getElementById('errorPopup').style.display = 'none';
+        }
+        
+        // Main login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorElement = document.getElementById('error-message');
+
+            // Clear previous errors
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+            hideError();
+
+            try {
+                const response = await fetch('emp_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Successful login - redirect immediately
+                    window.location.href = 'employee.php';
+                } else {
+                    // Show error in popup
+                    showError(result.message || 'Invalid email or password');
+                }
+            } catch (error) {
+                showError('Network error. Please try again.');
+                console.error('Error:', error);
+            }
+        });
+
+        // Close popup when X is clicked
+        document.querySelector('.close-popup').addEventListener('click', hideError);
+    </script>
 </body>
 </html>
