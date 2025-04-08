@@ -17,51 +17,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Updated role tables with correct ID fields
-        $role_tables = [
-            'carpenter' => ['table' => 'carpenter', 'id_field' => 'carp_id'],
-            'craneoperator' => ['table' => 'craneoperator', 'id_field' => 'craneop_id'],
-            'electrician' => ['table' => 'electrician', 'id_field' => 'electrician_id'],
-            'generallaborer' => ['table' => 'generallaborer', 'id_field' => 'laborer_id'],
-            'mason' => ['table' => 'mason', 'id_field' => 'mason_id'],
-            'plumber' => ['table' => 'plumber', 'id_field' => 'plum_id'],
-            'securityguard' => ['table' => 'securityguard', 'id_field' => 'guard_id'],
-            'sitesupervisor' => ['table' => 'sitesupervisor', 'id_field' => 'supervisor_id'],
-            'truckdriver' => ['table' => 'truckdriver', 'id_field' => 'driver_id'],
-            'welder' => ['table' => 'welder', 'id_field' => 'welder_id']
-        ];
+        // Check employee_dash table (hashed password verification)
+        $stmt = $conn->prepare("SELECT employee_id, name, email, password, role FROM employee_dash WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        $authenticated = false;
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
 
-        foreach ($role_tables as $role => $config) {
-            $stmt = $conn->prepare("SELECT {$config['id_field']}, name, email, password, status FROM {$config['table']} WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
+            // Verify hashed password
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['employee_id'] = $user['employee_id'];
+                $_SESSION['employee_email'] = $user['email'];
+                $_SESSION['employee_name'] = $user['name'];
+                $_SESSION['employee_role'] = strtolower(str_replace(' ', '', $user['role']));
 
-            if ($result->num_rows === 1) {
-                $user = $result->fetch_assoc();
-
-                if ($password === $user['password']) {
-                    $_SESSION['user_id'] = $user[$config['id_field']];
-                    $_SESSION['user_email'] = $user['email'];
-                    $_SESSION['user_name'] = $user['name'];
-                    $_SESSION['user_role'] = $role;
-
-                    $response['success'] = true;
-                    $response['message'] = 'Login successful';
-                    $response['role'] = $role;
-                    $authenticated = true;
-                    break;
-                }
+                $response['success'] = true;
+                $response['message'] = 'Login successful';
+                $response['role'] = $_SESSION['employee_role'];
+            } else {
+                $response['message'] = 'Invalid password';
             }
-            $stmt->close();
+        } else {
+            $response['message'] = 'Employee not found';
         }
 
-        if (!$authenticated) {
-            $response['message'] = 'Invalid email or password';
-        }
-
+        $stmt->close();
     } catch (Exception $e) {
         $response['message'] = 'Database error occurred';
         error_log('Login error: ' . $e->getMessage());
