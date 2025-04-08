@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul>
+        <li><a href="#" class="nav-link active" onclick="showSection('dashboard')">Dashboard</a></li>
+        <li><a href="#" class="nav-link" onclick="showSection('employees')">Employees</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Dashboard</div>
+          <i class="fas fa-bell"></i>
+          <i class="fas fa-user-circle"></i>
+        </div>
+      </div>
+      
+      <section id="dashboard" class="section active">
+        <div class="dashboard-container">
+          <iframe 
+            id="dash-iframe" 
+            src="/dash-app/" 
+            frameborder="0" 
+            style="width: 100%; height: calc(100vh - 150px);"
+          ></iframe>
+        </div>
+      </section>
+
+      <section id="employees" class="section">
+        <div class="section-header">
+          <h1>Employee Management</h1>
+          <button class="btn" onclick="openModal()">Add New Employee</button>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Join Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="employee-table-body">
+              <!-- Employee data will load here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div id="employeeModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Add New Employee</h2>
+      
+      <form id="employeeForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <input type="text" id="department" name="department" value="Construction" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" name="role" required>
+            <option value="">Select Role</option>
+            <option value="Site Supervisor / Foreman">Site Supervisor</option>
+            <option value="General Laborer">General Laborer</option>
+            <option value="Electrician">Electrician</option>
+            <option value="Plumber">Plumber</option>
+            <option value="Carpenter">Carpenter</option>
+            <option value="Mason">Mason</option>
+            <option value="Welder">Welder</option>
+            <option value="Crane Operator / Heavy Equipment Operator">Equipment Operator</option>
+            <option value="Truck Driver / Material Transporter">Truck Driver</option>
+            <option value="Security Guard">Security Guard</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Auto-generated Credentials</label>
+          <div class="credentials-display">
+            <input type="email" id="email" name="email" readonly>
+            <input type="text" id="password" name="password" readonly>
+          </div>
+        </div>
+
+        <button type="submit" class="btn">Add Employee</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
