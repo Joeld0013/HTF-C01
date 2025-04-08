@@ -1,67 +1,54 @@
 <?php
 header('Content-Type: application/json');
-ini_set('display_errors', 0);
 require 'dbconnect.php';
 
-function getRoleTable($role) {
-    return strtolower(str_replace([' ', '/'], '', $role));
+// Map full role to roleId
+function generateRoleId($role) {
+    $map = [
+        "Site Supervisor / Foreman" => "sitesupervisor",
+        "General Laborer" => "generallaborer",
+        "Electrician" => "electrician",
+        "Plumber" => "plumber",
+        "Carpenter" => "carpenter",
+        "Mason" => "mason",
+        "Welder" => "welder",
+        "Crane Operator / Heavy Equipment Operator" => "craneoperator",
+        "Truck Driver / Material Transporter" => "truckdriver",
+        "Security Guard" => "securityguard"
+    ];
+    return $map[$role] ?? null;
 }
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        // Validate input
-        if (empty($data['name']) || empty($data['role'])) {
-            throw new Exception("Name and role are required");
-        }
+    $input = json_decode(file_get_contents("php://input"), true);
+    $name = $input['name'] ?? '';
+    $role = $input['role'] ?? '';
 
-        $name = $data['name'];
-        $role = $data['role'];
-        $tableName = getRoleTable($role);
+    $roleId = generateRoleId($role);
+    if (!$roleId) throw new Exception("Invalid role");
 
-        // Find first available ID
-        $result = $conn->query("SELECT slno FROM `$tableName` ORDER BY slno");
-        $existingIds = [];
-        while ($row = $result->fetch_assoc()) {
-            $existingIds[] = $row['slno'];
-        }
+    // Generate Email and Password
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM `$roleId`");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $nextNum = str_pad($row['total'] + 1, 2, "0", STR_PAD_LEFT);
 
-        // Find first gap or next number
-        $newId = 1;
-        foreach ($existingIds as $id) {
-            if ($id > $newId) break; // Found a gap
-            $newId = $id + 1;
-        }
+    $email = "25{$roleId}{$nextNum}@gmail.com";
+    $password = "{$roleId}{$nextNum}";
+    $status = "Inactive";
+    $created_time = date("Y-m-d H:i:s");
 
-        // Generate email/password
-        $rolePrefix = strtolower(str_replace([' ', '/'], '', $role));
-        $formattedId = str_pad($newId, 2, '0', STR_PAD_LEFT);
-        $email = "25{$rolePrefix}{$formattedId}@gmail.com";
-        $password = "{$rolePrefix}{$formattedId}";
+    // Insert into correct role-based table
+    $stmt = $conn->prepare("INSERT INTO `$roleId` (name, role, email, password, status,joined_time) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $name, $role, $email, $password, $status,$joined_time);
 
-        // Insert into database
-        $stmt = $conn->prepare("INSERT INTO `$tableName` 
-                              (slno, name, role, email, password, status, joined_time, facescan) 
-                              VALUES (?, ?, ?, ?, ?, 'Inactive', NOW(), '')");
-        
-        $stmt->bind_param("issss", $newId, $name, $role, $email, $password);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to add employee: " . $conn->error);
-        }
-
-        echo json_encode([
-            'status' => 'success',
-            'email' => $email,
-            'password' => $password,
-            'id' => $newId
-        ]);
-
+    if ($stmt->execute()) {
+        echo json_encode(["status" => "success", "email" => $email, "password" => $password]);
     } else {
-        throw new Exception("Invalid request method");
+        throw new Exception("Insert failed: " . $stmt->error);
     }
 } catch (Exception $e) {
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
 }
 ?>

@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-ini_set('display_errors', 0);
-require 'dbconnect.php';
+require 'dbconnect.php';  // Ensure this connects to 'workforce' DB
 
+// Map full role names to table IDs
 function generateRoleId($role) {
     $map = [
         "Site Supervisor / Foreman" => "sitesupervisor",
@@ -21,45 +21,48 @@ function generateRoleId($role) {
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['role'])) {
-        $role = urldecode($_GET['role']);
+        $role = urldecode(trim($_GET['role']));
         $roleId = generateRoleId($role);
 
         if (!$roleId) {
-            throw new Exception("Invalid role");
+            throw new Exception("Invalid role: $role");
         }
 
-        $tableName = $roleId;
-        
-        // Get all existing numbers
-        $stmt = $conn->prepare("SELECT SUBSTRING(email, 3 + LENGTH(?), 2) as num FROM `$tableName` 
-                               WHERE email LIKE CONCAT('25', ?, '%@gmail.com') ORDER BY num");
+        // Now we use `$roleId` as the table name
+        $stmt = $conn->prepare("SELECT SUBSTRING(email, 3 + LENGTH(?), 2) as num 
+                                FROM `$roleId` 
+                                WHERE email LIKE CONCAT('25', ?, '%@gmail.com') 
+                                ORDER BY num ASC");
         $stmt->bind_param("ss", $roleId, $roleId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         $existingNumbers = [];
         while ($row = $result->fetch_assoc()) {
             $existingNumbers[] = intval($row['num']);
         }
-        
-        // Find first missing number (1-99)
-        $count = 1;
-        while ($count <= 99) {
-            if (!in_array($count, $existingNumbers)) {
+
+        // Find the first missing number between 1-99
+        for ($i = 1; $i <= 99; $i++) {
+            if (!in_array($i, $existingNumbers)) {
+                $nextNum = $i;
                 break;
             }
-            $count++;
         }
 
-        $formattedCount = str_pad($count, 2, "0", STR_PAD_LEFT);
+        if (!isset($nextNum)) {
+            throw new Exception("No available ID slots");
+        }
+
+        $formattedNum = str_pad($nextNum, 2, "0", STR_PAD_LEFT);
         echo json_encode([
             "status" => "success",
-            "email" => "25{$roleId}{$formattedCount}@gmail.com",
-            "password" => "{$roleId}{$formattedCount}",
-            "generated_id" => $count
+            "email" => "25{$roleId}{$formattedNum}@gmail.com",
+            "password" => "{$roleId}{$formattedNum}",
+            "generated_id" => $formattedNum
         ]);
     } else {
-        throw new Exception("Invalid request");
+        throw new Exception("Invalid request format");
     }
 } catch (Exception $e) {
     echo json_encode(["status" => "error", "message" => $e->getMessage()]);
