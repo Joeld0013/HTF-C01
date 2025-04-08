@@ -1,3 +1,71 @@
+/* Role Filter Dropdown Styles */
+.filter-container {
+  position: relative;
+  display: inline-block;
+  margin-left: auto;
+}
+
+.filter-btn {
+  background-color: #4a6cf7;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s;
+}
+
+.filter-btn:hover {
+  background-color: #3a5ce4;
+}
+
+.filter-btn i {
+  font-size: 14px;
+}
+
+.filter-dropdown {
+  position: absolute;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 100;
+  overflow: hidden;
+  display: none;
+  margin-top: 5px;
+  border: 1px solid #e0e0e0;
+}
+
+.filter-dropdown a {
+  display: block;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-dropdown a:last-child {
+  border-bottom: none;
+}
+
+.filter-dropdown a:hover {
+  background-color: #f5f7fa;
+  color: #4a6cf7;
+}
+
+/* Active filter indicator */
+.filter-dropdown a.active {
+  background-color: #eef2ff;
+  color: #4a6cf7;
+  font-weight: 500;
+}
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,7 +240,61 @@ input, select {
   from {opacity: 0;}
   to {opacity: 1;}
 }
+/* View Modal Styles */
+.view-modal {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
 
+.employee-details p {
+    margin: 10px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Action Buttons */
+.action-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    margin: 0 2px;
+    font-size: 15px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.view-btn {
+    color: #4CAF50;
+}
+
+.view-btn:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.edit-btn {
+    color: #2196F3;
+}
+
+.edit-btn:hover {
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.delete-btn {
+    color: #f44336;
+}
+
+.delete-btn:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* Edit Form Styles */
+#editEmployeeForm .form-group {
+    margin-bottom: 15px;
+}
 
 
 

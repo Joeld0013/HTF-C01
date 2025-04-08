@@ -1,13 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Calendar and Schedule Functionality
     const roles = document.querySelectorAll(".role");
     const dropZones = document.querySelectorAll(".drop-zone");
     const calendar = document.getElementById("calendar");
-    const prevWeekBtn = document.getElementById("prev-week"); // Select existing buttons
+    const prevWeekBtn = document.getElementById("prev-week");
     const nextWeekBtn = document.getElementById("next-week");
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dateHeaders = document.querySelectorAll("thead th:nth-child(n+2)");
+    let scheduleData = JSON.parse(localStorage.getItem("schedule")) || {};
+    let selectedDate = "";
 
-    // Function to get Monday of a given week
+    // Initialize calendar
     function getMonday(d) {
         d = new Date(d);
         let day = d.getDay();
@@ -15,67 +18,51 @@ document.addEventListener("DOMContentLoaded", () => {
         return new Date(d.setDate(diff));
     }
 
-    // Function to update week display
     function updateWeek(startDate) {
         let currentDate = getMonday(startDate);
-
         dateHeaders.forEach((th, index) => {
             let newDate = new Date(currentDate);
             newDate.setDate(newDate.getDate() + index);
-
-            // Ensure Sunday is skipped
             if (newDate.getDay() === 0) {
                 newDate.setDate(newDate.getDate() + 1);
             }
-
-            th.innerHTML = `<div class='day-header'>${days[index]}<br><span class='date'>${newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span></div>`;
+            th.innerHTML = `${days[index]}<br><span class="date">${newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>`;
         });
-
-        // Update calendar input to match the first date
         calendar.valueAsDate = getMonday(startDate);
+        selectedDate = calendar.value;
+        loadSchedule(selectedDate);
     }
 
-    // Calendar date change event
     calendar.addEventListener("change", (e) => {
         updateWeek(new Date(e.target.value));
     });
 
-    // Next week button event
     nextWeekBtn.addEventListener("click", () => {
         let currentDisplayedDate = new Date(dateHeaders[0].querySelector(".date").textContent.trim().replace(/,/g, ""));
         currentDisplayedDate.setDate(currentDisplayedDate.getDate() + 7);
-
-        // Skip Sunday
-        if (currentDisplayedDate.getDay() === 0) {
-            currentDisplayedDate.setDate(currentDisplayedDate.getDate() + 1);
-        }
-
         updateWeek(currentDisplayedDate);
     });
 
-    // Previous week button event
     prevWeekBtn.addEventListener("click", () => {
         let currentDisplayedDate = new Date(dateHeaders[0].querySelector(".date").textContent.trim().replace(/,/g, ""));
         currentDisplayedDate.setDate(currentDisplayedDate.getDate() - 7);
-
-        // Skip Sunday
-        if (currentDisplayedDate.getDay() === 0) {
-            currentDisplayedDate.setDate(currentDisplayedDate.getDate() - 1);
-        }
-
         updateWeek(currentDisplayedDate);
     });
 
     // Drag and drop functionality
-    roles.forEach(role => {
-        role.addEventListener("dragstart", (e) => {
-            e.dataTransfer.setData("text", e.target.id);
+    document.addEventListener("dragstart", (e) => {
+        if (e.target.classList.contains("role")) {
+            e.dataTransfer.setData("text/plain", e.target.id);
             e.target.classList.add("dragging");
-        });
+            document.body.classList.add("dragging-active");
+        }
+    });
 
-        role.addEventListener("dragend", (e) => {
+    document.addEventListener("dragend", (e) => {
+        if (e.target.classList.contains("role")) {
             e.target.classList.remove("dragging");
-        });
+            document.body.classList.remove("dragging-active");
+        }
     });
 
     dropZones.forEach(zone => {
@@ -90,268 +77,187 @@ document.addEventListener("DOMContentLoaded", () => {
 
         zone.addEventListener("drop", (e) => {
             e.preventDefault();
-            const roleId = e.dataTransfer.getData("text");
-            const role = document.getElementById(roleId);
-
-            // Prevent adding multiple roles to the same drop zone
-            if (zone.children.length === 0) {
-                zone.appendChild(role);
-            }
-
             zone.classList.remove("drop-hover");
+            
+            const roleId = e.dataTransfer.getData("text/plain");
+            const role = document.getElementById(roleId);
+            if (!role) return;
+            
+            // Clear existing content
+            while (zone.firstChild) {
+                zone.removeChild(zone.firstChild);
+            }
+            
+            // Create and append clone
+            const clone = role.cloneNode(true);
+            clone.classList.remove("dragging");
+            zone.appendChild(clone);
+            
+            storeAssignment(selectedDate, zone.id, roleId);
         });
     });
 
-    // Initialize with current week's dates
-    updateWeek(new Date());
-});
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    let scheduleData = JSON.parse(localStorage.getItem("schedule")) || {}; // Load saved schedule
-
-    const roles = document.querySelectorAll(".role");
-    const dropZones = document.querySelectorAll(".drop-zone");
-    const calendar = document.getElementById("calendar");
-    const saveButton = document.getElementById("save-schedule"); // Use existing button
-
-    let selectedDate = ""; 
-
-    // Update selected date
-    calendar.addEventListener("change", function () {
-        selectedDate = this.value;
-        loadSchedule(selectedDate);
-    });
-
-    // Drag events
-    roles.forEach(role => {
-        role.addEventListener("dragstart", function (event) {
-            event.dataTransfer.setData("text/plain", event.target.id);
-        });
-    });
-
-    dropZones.forEach(zone => {
-        zone.addEventListener("dragover", function (event) {
-            event.preventDefault();
-        });
-
-        zone.addEventListener("drop", function (event) {
-            event.preventDefault();
-            const roleId = event.dataTransfer.getData("text/plain");
-            const roleElement = document.getElementById(roleId);
-            this.innerHTML = ""; // Clear previous content
-            this.appendChild(roleElement.cloneNode(true)); // Move role
-            storeAssignment(selectedDate, this.id, roleId);
-        });
-    });
-
-    // Store assignment dynamically
-    function storeAssignment(date, shiftId, role) {
-        if (!date) {
-            alert("Please select a date first!");
-            return;
-        }
-        if (!scheduleData[date]) {
-            scheduleData[date] = {};
-        }
-        scheduleData[date][shiftId] = role;
+    function storeAssignment(date, shiftId, roleId) {
+        if (!date) return;
+        if (!scheduleData[date]) scheduleData[date] = {};
+        scheduleData[date][shiftId] = roleId;
+        localStorage.setItem("schedule", JSON.stringify(scheduleData));
     }
 
-    // Save schedule to localStorage
-    document.getElementById("load-schedule").addEventListener("click", function () {
-        const selectedDate = document.getElementById("calendar").value; // Get the selected date
-    
-        if (!selectedDate) {
-            alert("Please select a date first!");
-            return;
-        }
-    
-        fetch(`http://127.0.0.1:5000/get_schedule/${selectedDate}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("📤 Fetched Schedule:", data); // Debugging: Show received data in the console
-    
-                // Update the UI (Example: Display data in drop zones)
-                Object.keys(data).forEach(shiftId => {
-                    const dropZone = document.getElementById(shiftId);
-                    if (dropZone) {
-                        dropZone.innerHTML = `<div class="role">${data[shiftId]}</div>`; // Assign role
-                    }
-                });
-            })
-            .catch(error => console.error("❌ Error Fetching Schedule:", error));
-    });
-    
-    // Load saved schedule
     function loadSchedule(date) {
+        if (!date) return;
+        
         dropZones.forEach(zone => {
-            zone.innerHTML = "Drag & Drop";
+            // Reset to default text
+            if (zone.children.length === 0) {
+                zone.textContent = zone.id.includes("session1") ? "Shift 1: 9:00 AM - 12:00 PM" :
+                                  zone.id.includes("session2") ? "Shift 2: 1:00 PM - 6:00 PM" :
+                                  "Shift 3: 6:00 PM - 11:30 PM";
+            }
         });
-
+        
         if (scheduleData[date]) {
             for (const [shiftId, roleId] of Object.entries(scheduleData[date])) {
                 const dropZone = document.getElementById(shiftId);
-                if (dropZone) {
-                    const roleElement = document.getElementById(roleId);
-                    if (roleElement) {
-                        dropZone.innerHTML = "";
-                        dropZone.appendChild(roleElement.cloneNode(true));
-                    }
+                const roleElement = document.getElementById(roleId);
+                
+                if (dropZone && roleElement) {
+                    dropZone.innerHTML = "";
+                    const clone = roleElement.cloneNode(true);
+                    clone.classList.remove("dragging");
+                    dropZone.appendChild(clone);
                 }
             }
         }
     }
 
-
-});
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////
-/// Worker Assignment Functionality
-document.querySelectorAll('.worker-role-btn').forEach(btn => {
-    btn.addEventListener('click', async function() {
-        const role = this.getAttribute('data-worker-role');
-        await fetchWorkersByRole(role);
+    // Save/Load functionality
+    document.getElementById("save-schedule").addEventListener("click", () => {
+        localStorage.setItem("schedule", JSON.stringify(scheduleData));
+        alert("Schedule saved successfully!");
     });
-});
 
-async function fetchWorkersByRole(role) {
-    try {
-        // Show loading state
-        const workerList = document.getElementById('worker-data-list');
-        workerList.innerHTML = '<tr><td colspan="4" class="loading-workers">Loading workers...</td></tr>';
-        
-        // Replace with your actual API endpoint
-        const response = await fetch(`/api/workers?role=${encodeURIComponent(role)}`);
-        const workers = await response.json();
-        
-        displayWorkers(workers);
-    } catch (error) {
-        console.error('Error fetching workers:', error);
-        // Fallback to mock data
-        displayWorkers(generateMockWorkers(role));
-    }
-}
-
-function displayWorkers(workers) {
-    const tbody = document.getElementById('worker-data-list');
-    tbody.innerHTML = '';
-    
-    if (workers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="no-workers">No workers found for this role</td></tr>';
-        return;
-    }
-    
-    workers.forEach(worker => {
-        const tr = document.createElement('tr');
-        tr.setAttribute('draggable', 'true');
-        tr.setAttribute('data-worker-id', worker.id);
-        tr.classList.add('worker-row');
-        
-        tr.innerHTML = `
-            <td class="worker-id">${worker.id}</td>
-            <td class="worker-name">${worker.name}</td>
-            <td class="worker-role">${worker.role}</td>
-            <td class="worker-contact">${worker.contact}</td>
-        `;
-        
-        // Add drag events
-        tr.addEventListener('dragstart', handleWorkerDragStart);
-        tr.addEventListener('dragend', handleWorkerDragEnd);
-        
-        tbody.appendChild(tr);
-    });
-}
-
-// Worker Drag and Drop Handlers
-function handleWorkerDragStart(e) {
-    this.classList.add('worker-dragging');
-    e.dataTransfer.setData('text/plain', this.getAttribute('data-worker-id'));
-    e.dataTransfer.effectAllowed = 'move';
-}
-
-function handleWorkerDragEnd() {
-    this.classList.remove('worker-dragging');
-}
-
-// Update existing drop zones to accept workers
-document.querySelectorAll('.drop-zone').forEach(zone => {
-    zone.addEventListener('dragover', function(e) {
-        if (e.dataTransfer.types.includes('text/plain')) {
-            e.preventDefault();
-            this.classList.add('worker-drop-active');
-            e.dataTransfer.dropEffect = 'move';
+    document.getElementById("load-schedule").addEventListener("click", () => {
+        const loadedData = localStorage.getItem("schedule");
+        if (loadedData) {
+            scheduleData = JSON.parse(loadedData);
+            loadSchedule(selectedDate);
+            alert("Schedule loaded successfully!");
+        } else {
+            alert("No saved schedule found!");
         }
     });
-    
-    zone.addEventListener('dragleave', function() {
-        this.classList.remove('worker-drop-active');
+
+    // Add Role functionality
+    const addRoleBtn = document.getElementById("add-role-btn");
+    const newRoleInput = document.getElementById("new-role-input");
+    const rolesContainer = document.querySelector(".roles-container");
+
+    addRoleBtn.addEventListener("click", addNewRole);
+    newRoleInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") addNewRole();
     });
+
+    function addNewRole() {
+        const roleName = newRoleInput.value.trim();
+        if (!roleName) return;
+        
+        const roleCount = document.querySelectorAll(".role").length;
+        const newRole = document.createElement("div");
+        newRole.className = "role";
+        newRole.draggable = true;
+        newRole.id = `role${roleCount + 1}`;
+        newRole.textContent = roleName.toUpperCase();
+        
+        newRole.addEventListener("dragstart", function(e) {
+            e.dataTransfer.setData("text/plain", e.target.id);
+            e.target.classList.add("dragging");
+            document.body.classList.add("dragging-active");
+        });
+        
+        newRole.addEventListener("dragend", function() {
+            this.classList.remove("dragging");
+            document.body.classList.remove("dragging-active");
+        });
+        
+        rolesContainer.appendChild(newRole);
+        newRoleInput.value = "";
+    }
+
+    // Worker Management Section
+    const roleDropdown = document.getElementById("role-dropdown");
+    const fetchBtn = document.getElementById("fetch-workers");
+
+    fetchBtn.addEventListener("click", fetchWorkersByRole);
+
+    async function fetchWorkersByRole() {
+        const role = roleDropdown.value;
+        if (!role) {
+            alert("Please select a role first");
+            return;
+        }
     
-    zone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.classList.remove('worker-drop-active');
-        
-        const workerId = e.dataTransfer.getData('text/plain');
-        const workerRow = document.querySelector(`tr[data-worker-id="${workerId}"]`);
-        
-        if (workerRow) {
-            const workerName = workerRow.querySelector('.worker-name').textContent;
-            const workerRole = workerRow.querySelector('.worker-role').textContent;
+        const workerList = document.getElementById("worker-data-list");
+        workerList.innerHTML = '<div class="loading-workers">Loading workers...</div>';
+    
+        try {
+            const response = await fetch(`get_workers.php?role=${encodeURIComponent(role)}`);
+            if (!response.ok) throw new Error('Network response was not ok');
             
-            // Check if worker is already assigned
-            if (this.querySelector(`.assigned-worker[data-worker-id="${workerId}"]`)) {
-                return;
-            }
+            const workers = await response.json();
+            displayWorkers(workers);
+        } catch (error) {
+            console.error('Error:', error);
+            workerList.innerHTML = '<div class="error">Failed to load workers. Please try again.</div>';
+        }
+    }
+    
+    function displayWorkers(workers) {
+        const workerList = document.getElementById("worker-data-list");
+        workerList.innerHTML = '';
+    
+        if (!workers || workers.length === 0) {
+            workerList.innerHTML = '<div class="no-workers">No workers found for this role</div>';
+            return;
+        }
+    
+        workers.forEach(worker => {
+            const workerDiv = document.createElement("div");
+            workerDiv.className = "worker-bar";
+            workerDiv.setAttribute("draggable", "true");
+            workerDiv.setAttribute("data-worker-id", worker.employee_id);
             
-            // Create assigned worker element
-            const assignedWorker = document.createElement('div');
-            assignedWorker.className = 'assigned-worker';
-            assignedWorker.setAttribute('data-worker-id', workerId);
-            assignedWorker.innerHTML = `
-                ${workerName} (${workerRole})
-                <span class="remove-worker" title="Remove">×</span>
-            `;
-            
-            // Add remove functionality
-            assignedWorker.querySelector('.remove-worker').addEventListener('click', function() {
-                this.parentElement.remove();
+            const joinDate = new Date(worker.created_at);
+            const formattedDate = joinDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             });
             
-            this.appendChild(assignedWorker);
-        }
-    });
+            workerDiv.innerHTML = `
+                <div class="worker-id">${worker.employee_id || 'N/A'}</div>
+                <div class="worker-name">${worker.name || 'N/A'}</div>
+                <div class="worker-role">${worker.role || 'N/A'}</div>
+                <div class="worker-email">${worker.email || 'N/A'}</div>
+                <div class="worker-join-date">${formattedDate}</div>
+            `;
+    
+            workerDiv.addEventListener("dragstart", handleWorkerDragStart);
+            workerDiv.addEventListener("dragend", handleWorkerDragEnd);
+            
+            workerList.appendChild(workerDiv);
+        });
+    }
+
+    function handleWorkerDragStart(e) {
+        this.classList.add("worker-dragging");
+        e.dataTransfer.setData("text/plain", this.getAttribute("data-worker-id"));
+    }
+
+    function handleWorkerDragEnd() {
+        this.classList.remove("worker-dragging");
+    }
+
+    // Initialize with current week
+    updateWeek(new Date());
 });
-
-// Mock data generator
-function generateMockWorkers(role) {
-    const roleWorkers = {
-        'Site Supervisor / Foreman': [
-            { id: 'WF1001', name: 'John Smith', contact: '555-7890' },
-            { id: 'WF1002', name: 'Robert Johnson', contact: '555-7891' }
-        ],
-        'General Laborer': [
-            { id: 'WL2001', name: 'Mike Brown', contact: '555-1234' },
-            { id: 'WL2002', name: 'David Wilson', contact: '555-1235' },
-            { id: 'WL2003', name: 'James Davis', contact: '555-1236' }
-        ],
-        // Add mock data for other roles...
-    };
-
-    return roleWorkers[role] || [
-        {
-            id: `W${Math.floor(1000 + Math.random() * 9000)}`,
-            name: 'Sample Worker',
-            contact: `555-${Math.floor(1000 + Math.random() * 9000)}`,
-            role: role
-        }
-    ];
-}
