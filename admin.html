@@ -19,7 +19,7 @@
 
     <main class="main-content">
       <div class="topbar">
-        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-title">NEURO SHEDULE</div>
         <div class="topbar-icons">
           <i class="fas fa-bell"></i>
           <i class="fas fa-user-circle"></i>
@@ -119,7 +119,58 @@
       </form>
     </div>
   </div>
+'<!-- View Employee Modal -->
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+      <!-- Content will be inserted dynamically -->
+  </div>
+</div>
 
+<!-- Edit Employee Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+      <span class="close" onclick="closeEditModal()">&times;</span>
+      <h2>Edit Employee</h2>
+      <form id="editEmployeeForm">
+          <input type="hidden" id="editEmployeeId">
+          
+          <div class="form-group">
+              <label for="editName">Full Name</label>
+              <input type="text" id="editName" name="name" required>
+          </div>
+
+          <div class="form-group">
+              <label for="editGender">Gender</label>
+              <select id="editGender" name="gender" required>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+              </select>
+          </div>
+
+          <div class="form-group">
+              <label for="editDepartment">Department</label>
+              <input type="text" id="editDepartment" name="department" required>
+          </div>
+
+          <div class="form-group">
+              <label for="editRole">Role</label>
+              <select id="editRole" name="role" required>
+                  <option value="">Select Role</option>
+                  <option value="Site Supervisor / Foreman">Site Supervisor</option>
+                  <!-- Add all other roles as in your add form -->
+              </select>
+          </div>
+
+          <div class="form-group">
+              <label for="editEmail">Email</label>
+              <input type="email" id="editEmail" name="email" required>
+          </div>
+
+          <button type="submit" class="btn">Update Employee</button>
+      </form>
+  </div>
+</div>'
   <script src="admin.js"></script>
 </body>
 </html>
