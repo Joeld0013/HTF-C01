@@ -55,61 +55,60 @@ async function loadEmployees() {
   }
 }
 
-// Email Generation
 document.getElementById('role').addEventListener('change', async function() {
   const role = this.value;
   if (!role) return;
   
   try {
-    const response = await fetch(`generate_email.php?role=${encodeURIComponent(role)}`);
-    const data = await response.json();
-    
-    if (data.status === 'success') {
-      document.getElementById('email').value = data.email;
-      document.getElementById('password').value = data.password;
-    } else {
-      throw new Error(data.message || 'Failed to generate credentials');
-    }
+      const response = await fetch(`generate_email.php?role=${encodeURIComponent(role)}`);
+      const data = await response.json();
+      
+      if (data.status === "success") {
+          document.getElementById("email").value = data.email;
+          document.getElementById("password").value = data.password;
+          // Store next_num in a hidden field or data attribute
+          document.getElementById("employeeForm").dataset.nextNum = data.next_num;
+      } else {
+          throw new Error(data.message || 'Failed to generate credentials');
+      }
   } catch (error) {
-    console.error('Error generating email:', error);
-    alert('Error generating credentials: ' + error.message);
+      console.error("Error:", error);
+      alert("Error generating credentials: " + error.message);
   }
 });
 
-// Form Submission
-document.getElementById('employeeForm').addEventListener('submit', async function(e) {
+document.getElementById("employeeForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   
   const formData = {
-    name: document.getElementById('name').value,
-    gender: document.getElementById('gender').value,
-    department: document.getElementById('department').value,
-    role: document.getElementById('role').value,
-    email: document.getElementById('email').value,
-    password: document.getElementById('password').value
+      name: document.getElementById("name").value,
+      gender: document.getElementById("gender").value,
+      department: document.getElementById("department").value,
+      role: document.getElementById("role").value,
+      email: document.getElementById("email").value,
+      password: document.getElementById("password").value,
+      next_num: this.dataset.nextNum // Include the next_num in the submission
   };
-  
+
   try {
-    const response = await fetch('add_employee.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-    
-    const data = await response.json();
-    
-    if (data.status === 'success') {
-      alert('Employee added successfully!');
-      closeModal();
-      loadEmployees();
-    } else {
-      throw new Error(data.message || 'Failed to add employee');
-    }
+      const response = await fetch("add_employee.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+      
+      if (data.status === "success") {
+          alert(`Employee added successfully!\nID: ${data.employee_id}\nEmail: ${data.email}`);
+          closeModal();
+          loadEmployees();
+      } else {
+          throw new Error(data.message || "Failed to add employee");
+      }
   } catch (error) {
-    console.error('Error adding employee:', error);
-    alert('Error: ' + error.message);
+      alert("Error: " + error.message);
+      console.error("Error:", error);
   }
 });
 
