@@ -784,4 +784,4 @@ app.index_string = '''
 '''
 
 if __name__ == '__main__':
-    app.run(debug=True,port=8061)
+    app.run(debug=True,port=8050)
