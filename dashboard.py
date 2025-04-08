@@ -5,143 +5,218 @@ import plotly.graph_objects as go
 import plotly.express as px
 import datetime
 import calendar
+import random
 import requests
-from db_connection import create_db_connection, execute_read_query, execute_query, DB_HOST, DB_USER, DB_PASS, DB_NAME
 
-# Create database connection
-connection = create_db_connection(DB_HOST, DB_USER, DB_PASS, DB_NAME)
+# Sample data
+df_employees = pd.DataFrame([{
+    'employee_id': 'E001',
+    'name': 'Anna Jensen',
+    'department': 'Finance',
+    'join_date': '2021-04-15',
+    'months_employed': 36,
+    'base_salary': 42000,
+    'holiday_allowance': 5250,
+    'annual_leave_balance': 15,
+    'annual_leave_total': 25,
+    'parental_leave_balance': 10,
+    'parental_leave_total': 32,
+    'paternity_leave_balance': 2,
+    'paternity_leave_total': 2,
+    'bereavement_leave_balance': 3,
+    'bereavement_leave_total': 3,
+    'sick_leave_taken': 2
+}])
 
-# Function to fetch employee data
-def fetch_employee_data(employee_id):
-    query = """
-    SELECT * FROM userss 
-    WHERE employee_id = %s
-    """
-    params = (employee_id,)
-    result = execute_read_query(connection, query, params)
-    
-    if result:
-        return pd.DataFrame(result)
-    return None
+df_attendance = pd.DataFrame([
+    {'employee_id': 'E001', 'date': '2024-04-05', 'check_in': '08:00', 'check_out': '16:30', 'overtime_hours': 0.5, 'status': 'Present'},
+    {'employee_id': 'E001', 'date': '2024-04-04', 'check_in': '08:10', 'check_out': '17:00', 'overtime_hours': 1.0, 'status': 'Present'},
+    {'employee_id': 'E001', 'date': '2024-04-03', 'check_in': '08:05', 'check_out': '16:40', 'overtime_hours': 0.7, 'status': 'Present'},
+    {'employee_id': 'E001', 'date': '2024-04-02', 'check_in': '08:15', 'check_out': '16:30', 'overtime_hours': 0.0, 'status': 'Present'},
+    {'employee_id': 'E001', 'date': '2024-04-01', 'check_in': '08:00', 'check_out': '16:45', 'overtime_hours': 0.8, 'status': 'Present'}
+])
 
-# Function to fetch attendance data
-def fetch_attendance_data(employee_id, limit=5):
-    query = """
-    SELECT date, check_in, check_out, overtime_hours, status
-    FROM attendances 
-    WHERE employee_id = %s
-    ORDER BY date DESC
-    LIMIT %s
-    """
-    params = (employee_id, limit)
-    result = execute_read_query(connection, query, params)
-    
-    if result:
-        return pd.DataFrame(result)
-    return None
+df_leaves = pd.DataFrame([
+    {'employee_id': 'E001', 'leave_type': 'Annual Leave', 'start_date': '2024-03-15', 'end_date': '2024-03-18', 'duration': 3, 'status': 'Approved'},
+    {'employee_id': 'E001', 'leave_type': 'Sick Leave', 'start_date': '2024-02-10', 'end_date': '2024-02-11', 'duration': 2, 'status': 'Approved'}
+])
 
-# Function to fetch leave data
-def fetch_leave_data(employee_id):
-    query = """
-    SELECT leave_type, start_date, end_date, duration, status
-    FROM leaves 
-    WHERE employee_id = %s
-    ORDER BY start_date DESC
-    """
-    params = (employee_id,)
-    result = execute_read_query(connection, query, params)
-    
-    if result:
-        return pd.DataFrame(result)
-    return None
 
-# Function to fetch performance data
-def fetch_performance_data(employee_id, months=6):
-    query = """
-    SELECT month, year, performance_score, attendance_score, overtime_hours,
-           productivity_score, communication_score, collaboration_score, quality_score
-    FROM performance 
-    WHERE employee_id = %s
-    ORDER BY year DESC, FIELD(month, 'Dec', 'Nov', 'Oct', 'Sep', 'Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar', 'Feb', 'Jan')
-    LIMIT %s
-    """
-    params = (employee_id, months)
-    result = execute_read_query(connection, query, params)
-    
-    if result:
-        return pd.DataFrame(result)
-    return None
-
-# Function to fetch AI task recommendations
-def fetch_ai_tasks(employee_id):
-    query = """
-    SELECT priority, task, deadline, status
-    FROM ai_tasks 
-    WHERE employee_id = %s
-    ORDER BY 
-        CASE 
-            WHEN priority = 'High' THEN 1
-            WHEN priority = 'Medium' THEN 2
-            WHEN priority = 'Low' THEN 3
-            ELSE 4
-        END,
-        deadline ASC
-    """
-    params = (employee_id,)
-    result = execute_read_query(connection, query, params)
-    
-    if result:
-        return result
-    return []
-
-# Function to create a new AI task
-def create_ai_task(employee_id, priority, task, deadline, status):
-    query = """
-    INSERT INTO ai_tasks (employee_id, priority, task, deadline, status)
-    VALUES (%s, %s, %s, %s, %s)
-    """
-    params = (employee_id, priority, task, deadline, status)
-    return execute_query(connection, query, params)
-
-# Helper function to calculate months employed
-def calculate_months_employed(join_date):
-    today = datetime.date.today()
-    join_date = datetime.datetime.strptime(join_date, '%Y-%m-%d').date()
-    months = (today.year - join_date.year) * 12 + (today.month - join_date.month)
-    return months
-
-# Use weather API function from original code
 def get_weather_data(api_key, city_name, units='metric'):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units={units}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        weather_info = {
-            'current': {
-                'temp': data['main']['temp'],
-                'condition': data['weather'][0]['description'],
-                'humidity': data['main']['humidity'],
-                'wind_speed': data['wind']['speed'],
-                'icon': get_weather_icon(data['weather'][0]['icon'])
-            }
+    try:
+        # Get current weather
+        current_url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units={units}"
+        current_response = requests.get(current_url)
+        
+        # Check if request was successful
+        if current_response.status_code != 200:
+            print(f"Error fetching current weather: {current_response.status_code}")
+            print(current_response.json())
+            return None
+        
+        current_data = current_response.json()
+        
+        # Get forecast (5-day)
+        forecast_url = f"http://api.openweathermap.org/data/2.5/forecast?q={city_name}&appid={api_key}&units={units}"
+        forecast_response = requests.get(forecast_url)
+        
+        if forecast_response.status_code != 200:
+            print(f"Error fetching forecast: {forecast_response.status_code}")
+            print(forecast_response.json())
+            return None
+            
+        forecast_data = forecast_response.json()
+        
+        # Process current weather with error checking
+        if 'main' not in current_data:
+            print("Unexpected current weather response format:")
+            print(current_data)
+            return None
+            
+        current_weather = {
+            'temp': current_data['main'].get('temp', 'N/A'),
+            'condition': current_data['weather'][0]['description'].title() if 'weather' in current_data else 'N/A',
+            'humidity': current_data['main'].get('humidity', 'N/A'),
+            'wind_speed': current_data['wind'].get('speed', 'N/A') if 'wind' in current_data else 'N/A',
+            'icon': get_weather_icon(current_data['weather'][0]['icon']) if 'weather' in current_data else '☁️'
         }
-        return weather_info
-    else:
+        
+        # Process forecast with error checking
+        forecast = []
+        today = datetime.datetime.now()
+        
+        for i in range(3):  # Get today + next 2 days
+            try:
+                if i == 0:
+                    # Today's forecast (use first forecast entry)
+                    day_data = forecast_data['list'][0]
+                    day_name = 'Today'
+                else:
+                    # Find noon forecast for next days
+                    target_date = today + datetime.timedelta(days=i)
+                    target_date_str = target_date.strftime('%Y-%m-%d')
+                    day_forecasts = [f for f in forecast_data['list'] if f['dt_txt'].startswith(target_date_str)]
+                    day_data = day_forecasts[len(day_forecasts)//2] if day_forecasts else forecast_data['list'][i*8]
+                    day_name = (today + datetime.timedelta(days=i)).strftime('%A')
+                
+                forecast_entry = {
+                    'day': day_name,
+                    'temp_high': day_data['main'].get('temp_max', 'N/A'),
+                    'temp_low': day_data['main'].get('temp_min', 'N/A'),
+                    'condition': day_data['weather'][0]['description'].title() if 'weather' in day_data else 'N/A',
+                    'icon': get_weather_icon(day_data['weather'][0]['icon']) if 'weather' in day_data else '☁️'
+                }
+                
+                # Add warnings if applicable
+                warnings = []
+
+# Heavy rain
+                if 'rain' in day_data and day_data['rain'].get('3h', 0) > 10:
+                    warnings.append('⚠️ Heavy Rain Warning')
+
+# Strong winds
+                if 'wind' in day_data and day_data['wind'].get('speed', 0) > 15:
+                    warnings.append('🌬️ Strong Wind Advisory')
+
+# Thunderstorms
+                if 'weather' in day_data and 'storm' in day_data['weather'][0]['description'].lower():
+                    warnings.append('⛈️ Thunderstorm Warning')
+
+# If there are any warnings, add to forecast_entry
+                if warnings:
+                    forecast_entry['warnings'] = warnings
+    
+                    
+                forecast.append(forecast_entry)
+            except (KeyError, IndexError) as e:
+                print(f"Error processing forecast day {i}: {str(e)}")
+                continue
+        
+        return {
+            'current': current_weather,
+            'forecast': forecast
+        }
+        
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         return None
 
 def get_weather_icon(icon_code):
-    mapping = {
-        "01d": "☀️", "01n": "🌙", "02d": "⛅", "02n": "☁️",
-        "03d": "☁️", "03n": "☁️", "04d": "☁️", "04n": "☁️",
-        "09d": "🌧️", "09n": "🌧️", "10d": "🌦️", "10n": "🌧️",
-        "11d": "⛈️", "11n": "⛈️", "13d": "❄️", "13n": "❄️",
-        "50d": "🌫️", "50n": "🌫️"
+    icon_map = {
+        '01d': '☀️', '01n': '🌙',
+        '02d': '⛅', '02n': '⛅',
+        '03d': '☁️', '03n': '☁️',
+        '04d': '☁️', '04n': '☁️',
+        '09d': '🌧️', '09n': '🌧️',
+        '10d': '🌦️', '10n': '🌦️',
+        '11d': '⛈️', '11n': '⛈️',
+        '13d': '❄️', '13n': '❄️',
+        '50d': '🌫️', '50n': '🌫️'
     }
-    return mapping.get(icon_code, "☁️")
+    return icon_map.get(icon_code, '🌈')
+
+# Usage with fallback to sample data
+api_key = "adeb8ce5ba02e4a09b6befe21d7144a9"  # Replace with your actual API key
+city_name = "Bangalore "
+
+weather_data = get_weather_data(api_key, city_name)
+
+if weather_data is None:
+    print("Failed to fetch real weather data, using sample data instead")
+    weather_data = {
+        'current': {
+            'temp': 18,
+            'condition': 'Partly Cloudy',
+            'humidity': 65,
+            'wind_speed': 12,
+            'icon': '⛅'
+        },
+        'forecast': [
+            {'day': 'Today', 'temp_high': 18, 'temp_low': 10, 'condition': 'Partly Cloudy', 'icon': '⛅'},
+            {'day': 'Tomorrow', 'temp_high': 22, 'temp_low': 12, 'condition': 'Sunny', 'icon': '☀️'},
+            {'day': 'Wednesday', 'temp_high': 17, 'temp_low': 9, 'condition': 'Rain', 'icon': '🌧️', 'warning': 'Heavy Rain Warning'}
+        ]
+    }
+
+#print(weather_data)
+
+# AI task recommendations
+ai_tasks = [
+    {'priority': 'High', 'task': 'Complete Q2 financial report', 'deadline': '2024-04-15', 'status': 'Pending'},
+    {'priority': 'Medium', 'task': 'Review department budget allocations', 'deadline': '2024-04-20', 'status': 'Pending'},
+    {'priority': 'Low', 'task': 'Update expense tracking spreadsheet', 'deadline': '2024-04-25', 'status': 'Pending'}
+]
+
+# Monthly performance data for charts
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+performance_data = [84, 78, 82, 91, 85, 89]
+attendance_data = [95, 92, 98, 100, 96, 98]
+overtime_monthly = [12, 8, 10, 15, 16, 14]
+
+# Generate leave balance data for pie chart
+leave_types = ['Annual Leave', 'Parental Leave', 'Paternity Leave', 'Bereavement Leave']
+leave_used = [10, 22, 0, 0]
+leave_remaining = [15, 10, 2, 3]
+
+# Create a color palette
+colors = {
+    'primary': '#1f77b4',
+    'secondary': '#2ca02c',
+    'accent': '#ff7f0e',
+    'background': '#f9fafb',
+    'card': '#ffffff',
+    'text': '#2c3e50',
+    'border': '#e1e4e8',
+    'warning': '#e74c3c',
+    'high': '#e74c3c',
+    'medium': '#f39c12',
+    'low': '#3498db'
+}
+
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 app.title = "Employee Dashboard"
 
-# Layout with tabs for better organization (keep from original code but with dynamic data)
+# Layout with tabs for better organization
 app.layout = html.Div([
     html.Div([
         html.Div([
@@ -152,7 +227,7 @@ app.layout = html.Div([
         
         dcc.Tabs(id='dashboard-tabs', value='overview', children=[
             dcc.Tab(label='Overview', value='overview'),
-            dcc.Tab(label='Attendances', value='attendances'),
+            dcc.Tab(label='Attendance', value='attendance'),
             dcc.Tab(label='Leave Management', value='leave'),
             dcc.Tab(label='Performance', value='performance')
         ], style={"margin-top": "20px"})
@@ -240,7 +315,7 @@ def render_tab_content(tab):
                         ], className="info-item"),
                         html.Div([
                             html.P("Months Employed"),
-                            html.H5(df_employees['months_employed'])
+                            html.H5(df_employees['months_employed'][0])
                         ], className="info-item")
                     ], className="info-grid"),
                     html.Div([
@@ -263,7 +338,7 @@ def render_tab_content(tab):
                             html.H5("High", style={"color": "#27ae60"})
                         ], className="insight-item"),
                         html.Div([
-                            html.P("Attendances"),
+                            html.P("Attendance"),
                             html.H5("98%", style={"color": "#27ae60"})
                         ], className="insight-item"),
                         html.Div([
@@ -299,13 +374,13 @@ def render_tab_content(tab):
                                 x=months, 
                                 y=attendance_data,
                                 mode='lines+markers',
-                                name='Attendances',
+                                name='Attendance',
                                 line=dict(color=colors['secondary'], width=3),
                                 marker=dict(size=8)
                             )
                         ],
                         'layout': go.Layout(
-                            title='Performance & Attendances Trends',
+                            title='Performance & Attendance Trends',
                             xaxis={'title': 'Month'},
                             yaxis={'title': 'Score', 'range': [60, 100]},
                             height=300,
@@ -317,12 +392,12 @@ def render_tab_content(tab):
                 )
             ], className="card")
         ])
-    
-    elif tab == 'attendances':
+        
+    elif tab == 'attendance':
         return html.Div([
             html.Div([
                 html.Div([
-                    html.H4("Recent Attendances", className="card-title"),
+                    html.H4("Recent Attendance", className="card-title"),
                     html.Div([
                         html.Table([
                             html.Thead(html.Tr([html.Th(col) for col in ['Date', 'Check In', 'Check Out', 'Overtime', 'Status']])),
@@ -333,7 +408,7 @@ def render_tab_content(tab):
                                     html.Td(row['check_out']),
                                     html.Td(f"{row['overtime_hours']} hrs" if row['overtime_hours'] else "-"),
                                     html.Td(html.Span(row['status'], className="status-badge present"))
-                                ]) for _, row in df_attendances.iterrows()
+                                ]) for _, row in df_attendance.iterrows()
                             ])
                         ], className="data-table")
                     ], className="table-container")
@@ -431,15 +506,15 @@ def render_tab_content(tab):
                     figure={
                         'data': [
                             go.Scatterpolar(
-                                r=radar_data,
-                                theta=['Productivity', 'Attendances', 'Communication', 'Collaboration', 'Quality'],
+                                r=[89, 95, 82, 78, 90],
+                                theta=['Productivity', 'Attendance', 'Communication', 'Collaboration', 'Quality'],
                                 fill='toself',
                                 name='Current',
                                 line_color=colors['primary']
                             ),
                             go.Scatterpolar(
                                 r=[75, 75, 75, 75, 75],
-                                theta=['Productivity', 'Attendances', 'Communication', 'Collaboration', 'Quality'],
+                                theta=['Productivity', 'Attendance', 'Communication', 'Collaboration', 'Quality'],
                                 fill='toself',
                                 name='Target',
                                 line_color=colors['accent'],
@@ -459,120 +534,10 @@ def render_tab_content(tab):
                         )
                     }
                 )
-            ], className="card"),
-            
-            # Add monthly performance trend
-            html.Div([
-                html.H4("Monthly Performance Detail", className="card-title"),
-                html.Div([
-                    html.Div([
-                        dcc.Graph(
-                            id='performance-detail-graph',
-                            figure={
-                                'data': [
-                                    go.Bar(
-                                        x=months,
-                                        y=performance_data,
-                                        name='Performance',
-                                        marker_color=colors['primary']
-                                    )
-                                ],
-                                'layout': go.Layout(
-                                    title='Monthly Performance Score',
-                                    xaxis={'title': 'Month'},
-                                    yaxis={'title': 'Score', 'range': [60, 100]},
-                                    height=300,
-                                    margin={'l': 40, 'b': 40, 't': 50, 'r': 10}
-                                )
-                            }
-                        )
-                    ], className="flex-1"),
-                    
-                    html.Div([
-                        dcc.Graph(
-                            id='productivity-comparison-graph',
-                            figure={
-                                'data': [
-                                    go.Bar(
-                                        x=months,
-                                        y=[88, 82, 85, 93, 91, 89],
-                                        name='You',
-                                        marker_color=colors['primary']
-                                    ),
-                                    go.Bar(
-                                        x=months,
-                                        y=[79, 80, 81, 82, 83, 81],
-                                        name='Department Average',
-                                        marker_color=colors['accent'],
-                                        opacity=0.7
-                                    )
-                                ],
-                                'layout': go.Layout(
-                                    title='You vs. Department Average',
-                                    xaxis={'title': 'Month'},
-                                    yaxis={'title': 'Score', 'range': [60, 100]},
-                                    barmode='group',
-                                    height=300,
-                                    margin={'l': 40, 'b': 40, 't': 50, 'r': 10},
-                                    legend={'orientation': 'h', 'y': -0.2}
-                                )
-                            }
-                        )
-                    ], className="flex-1")
-                ], className="card-row"),
-            ], className="card"),
-            
-            # Performance feedback and improvement suggestions
-            html.Div([
-                html.H4("AI Performance Insights", className="card-title"),
-                html.Div([
-                    html.Div([
-                        html.H5("Strengths", style={"color": colors['secondary'], "margin-bottom": "10px"}),
-                        html.Ul([
-                            html.Li("Excellent attendances record with 98% consistency"),
-                            html.Li("Strong attention to detail in financial reporting"),
-                            html.Li("Effective time management during high-pressure periods")
-                        ], style={"padding-left": "20px"})
-                    ], className="flex-1"),
-                    
-                    html.Div([
-                        html.H5("Growth Areas", style={"color": colors['accent'], "margin-bottom": "10px"}),
-                        html.Ul([
-                            html.Li("Consider reducing overtime hours for better work-life balance"),
-                            html.Li("Opportunity to improve cross-departmental collaboration"),
-                            html.Li("Potential to take more initiative in team meetings")
-                        ], style={"padding-left": "20px"})
-                    ], className="flex-1")
-                ], className="card-row"),
-                
-                html.Div([
-                    html.H5("Development Suggestions", style={"margin-bottom": "10px"}),
-                    html.P("Based on your performance pattern, consider these development opportunities:"),
-                    html.Div([
-                        html.Div([
-                            html.Div([
-                                html.H6("Advanced Excel for Finance", className="suggestion-title"),
-                                html.P("3-week online course to enhance financial modeling skills")
-                            ], className="suggestion-card")
-                        ], className="flex-1"),
-                        html.Div([
-                            html.Div([
-                                html.H6("Leadership Communication", className="suggestion-title"),
-                                html.P("2-day workshop on effective team communication")
-                            ], className="suggestion-card")
-                        ], className="flex-1"),
-                        html.Div([
-                            html.Div([
-                                html.H6("Time Management Mastery", className="suggestion-title"),
-                                html.P("1-day seminar on prioritization and productivity")
-                            ], className="suggestion-card")
-                        ], className="flex-1")
-                    ], className="card-row", style={"margin-top": "15px"})
-                ], style={"margin-top": "20px"})
             ], className="card")
         ])
 
-
+# Generate task recommendations callback
 @callback(
     Output('tab-content', 'children', allow_duplicate=True),
     Input('generate-tasks-btn', 'n_clicks'),
@@ -581,222 +546,25 @@ def render_tab_content(tab):
 )
 def generate_new_tasks(n_clicks, current_tab):
     if current_tab == 'overview':
-        # Generate a new random task and save to database
-        import random
-        from datetime import datetime, timedelta
-        
-        # Task options
-        task_options = [
-            'Prepare monthly expense report',
-            'Schedule team meeting for budget review',
-            'Update quarterly forecasts',
-            'Create presentation for management meeting',
-            'Review invoices for payment processing',
-            'Update department budget allocations',
-            'Complete compliance training',
-            'Review expense claims',
-            'Prepare for performance review meeting',
-            'Analyze departmental KPIs'
-        ]
-        
-        priority_options = ['High', 'Medium', 'Low']
-        
-        # Generate random deadline in the next 30 days
-        today = datetime.now()
-        deadline = today + timedelta(days=random.randint(5, 30))
-        deadline_str = deadline.strftime('%Y-%m-%d')
-        
-        # Create new task
+        # Generate some new random tasks
         new_task = {
-            'priority': random.choice(priority_options),
-            'task': random.choice(task_options),
-            'deadline': deadline_str,
+            'priority': random.choice(['High', 'Medium', 'Low']),
+            'task': random.choice([
+                'Prepare monthly expense report',
+                'Schedule team meeting for budget review',
+                'Update quarterly forecasts',
+                'Create presentation for management meeting',
+                'Review invoices for payment processing'
+            ]),
+            'deadline': f'2024-04-{random.randint(15, 30)}',
             'status': 'New'
         }
-        
-        # Insert into database
-        create_ai_task(EMPLOYEE_ID, new_task['priority'], new_task['task'], new_task['deadline'], new_task['status'])
-        
-        # Refresh tasks from database
-        updated_tasks = fetch_ai_tasks(EMPLOYEE_ID)
-        
-        # Update global variable to reflect database state
-        global ai_tasks
-        ai_tasks = updated_tasks
+        ai_tasks.insert(0, new_task)
+        if len(ai_tasks) > 5:
+            ai_tasks.pop()
         
         # Return the updated overview tab
         return render_tab_content('overview')
-    
-    return render_tab_content(current_tab)
-
-# Request leave form modal
-@callback(
-    Output('tab-content', 'children', allow_duplicate=True),
-    Input('request-leave-btn', 'n_clicks'),
-    State('dashboard-tabs', 'value'),
-    prevent_initial_call=True
-)
-def show_leave_request_modal(n_clicks, current_tab):
-    # In a real implementation, you would show a modal for leave request
-    # For now, we'll just return the same content with a mock confirmation
-    if current_tab == 'leave':
-        # Show a mock confirmation message
-        return html.Div([
-            html.Div([
-                html.Div([
-                    html.H4("Leave Request Form", className="card-title"),
-                    html.Div([
-                        html.Div([
-                            html.Label("Leave Type"),
-                            dcc.Dropdown(
-                                id='leave-type-dropdown',
-                                options=[
-                                    {'label': 'Annual Leave', 'value': 'annual'},
-                                    {'label': 'Sick Leave', 'value': 'sick'},
-                                    {'label': 'Parental Leave', 'value': 'parental'},
-                                    {'label': 'Bereavement Leave', 'value': 'bereavement'}
-                                ],
-                                value='annual'
-                            )
-                        ], className="form-group"),
-                        html.Div([
-                            html.Label("Start Date"),
-                            dcc.DatePickerSingle(
-                                id='leave-start-date',
-                                date=datetime.datetime.now().date()
-                            )
-                        ], className="form-group"),
-                        html.Div([
-                            html.Label("End Date"),
-                            dcc.DatePickerSingle(
-                                id='leave-end-date',
-                                date=datetime.datetime.now().date() + datetime.timedelta(days=1)
-                            )
-                        ], className="form-group"),
-                        html.Div([
-                            html.Label("Reason"),
-                            dcc.Textarea(
-                                id='leave-reason',
-                                placeholder='Enter reason for leave...',
-                                style={'width': '100%', 'height': 100}
-                            )
-                        ], className="form-group"),
-                        html.Div([
-                            html.Button('Submit Request', id='submit-leave-btn', className="action-button"),
-                            html.Button('Cancel', id='cancel-leave-btn', className="cancel-button")
-                        ], className="button-group")
-                    ], className="form-container")
-                ], className="card flex-1"),
-                
-                html.Div([
-                    html.H4("Leave Balance", className="card-title"),
-                    dcc.Graph(
-                        id='leave-balance-chart',
-                        figure={
-                            'data': [
-                                go.Bar(
-                                    x=leave_types,
-                                    y=leave_remaining,
-                                    name='Remaining',
-                                    marker_color=colors['primary']
-                                ),
-                                go.Bar(
-                                    x=leave_types,
-                                    y=leave_used,
-                                    name='Used',
-                                    marker_color=colors['accent']
-                                )
-                            ],
-                            'layout': go.Layout(
-                                barmode='stack',
-                                title='Leave Days Balance',
-                                xaxis={'title': 'Leave Type'},
-                                yaxis={'title': 'Days'},
-                                height=300,
-                                margin={'l': 40, 'b': 40, 't': 50, 'r': 10},
-                                legend={'orientation': 'h', 'y': -0.2}
-                            )
-                        }
-                    )
-                ], className="card flex-1")
-            ], className="card-row"),
-            
-            html.Div([
-                html.H4("Leave History", className="card-title"),
-                html.Div([
-                    html.Table([
-                        html.Thead(html.Tr([html.Th(col) for col in ['Type', 'Start Date', 'End Date', 'Duration', 'Status']])),
-                        html.Tbody([
-                            html.Tr([
-                                html.Td(row['leave_type']),
-                                html.Td(row['start_date']),
-                                html.Td(row['end_date']),
-                                html.Td(f"{row['duration']} days"),
-                                html.Td(html.Span(row['status'], className="status-badge approved"))
-                            ]) for _, row in df_leaves.iterrows()
-                        ])
-                    ], className="data-table")
-                ], className="table-container")
-            ], className="card")
-        ])
-    
-    return render_tab_content(current_tab)
-
-# Submit leave request callback - This would insert into the database in a real app
-@callback(
-    Output('tab-content', 'children', allow_duplicate=True),
-    Input('submit-leave-btn', 'n_clicks'),
-    State('leave-type-dropdown', 'value'),
-    State('leave-start-date', 'date'),
-    State('leave-end-date', 'date'),
-    State('leave-reason', 'value'),
-    State('dashboard-tabs', 'value'),
-    prevent_initial_call=True
-)
-def submit_leave_request(n_clicks, leave_type, start_date, end_date, reason, current_tab):
-    if n_clicks and current_tab == 'leave':
-        # In a real application, this would insert the leave request into the database
-        # For now, just return a success message
-        return html.Div([
-            html.Div([
-                html.Div([
-                    html.H4("Request Submitted", className="card-title"),
-                    html.Div([
-                        html.P("Your leave request has been submitted successfully.", className="success-message"),
-                        html.P(f"Leave type: {leave_type}", className="request-detail"),
-                        html.P(f"Period: {start_date} to {end_date}", className="request-detail"),
-                        html.Button('Back to Leave Management', id='back-to-leave-btn', className="action-button")
-                    ], className="confirmation-container")
-                ], className="card")
-            ])
-        ])
-    
-    return render_tab_content(current_tab)
-
-# Cancel leave request callback - Just return to leave management tab
-@callback(
-    Output('tab-content', 'children', allow_duplicate=True),
-    Input('cancel-leave-btn', 'n_clicks'),
-    State('dashboard-tabs', 'value'),
-    prevent_initial_call=True
-)
-def cancel_leave_request(n_clicks, current_tab):
-    if n_clicks and current_tab == 'leave':
-        return render_tab_content('leave')
-    
-    return render_tab_content(current_tab)
-
-# Back to leave management callback
-@callback(
-    Output('tab-content', 'children', allow_duplicate=True),
-    Input('back-to-leave-btn', 'n_clicks'),
-    State('dashboard-tabs', 'value'),
-    prevent_initial_call=True
-)
-def back_to_leave_management(n_clicks, current_tab):
-    if n_clicks and current_tab == 'leave':
-        return render_tab_content('leave')
-    
     return render_tab_content(current_tab)
 
 # CSS embedded
@@ -942,20 +710,6 @@ app.index_string = '''
             .action-button:hover {
                 background-color: #166aaa;
             }
-            .cancel-button {
-                background-color: #ecf0f1;
-                color: #7f8c8d;
-                border: none;
-                padding: 10px 16px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-weight: 500;
-                margin-left: 10px;
-                transition: background-color 0.3s;
-            }
-            .cancel-button:hover {
-                background-color: #e0e0e0;
-            }
             .tab-content {
                 margin-top: 20px;
             }
@@ -1015,52 +769,6 @@ app.index_string = '''
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 15px;
-            }
-            /* Form styles */
-            .form-group {
-                margin-bottom: 15px;
-            }
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: 500;
-            }
-            .form-container {
-                max-width: 100%;
-            }
-            .button-group {
-                margin-top: 20px;
-                display: flex;
-                justify-content: flex-start;
-            }
-            .success-message {
-                color: #27ae60;
-                font-size: 1.1rem;
-                margin-bottom: 15px;
-            }
-            .request-detail {
-                margin: 5px 0;
-                color: #7f8c8d;
-            }
-            .suggestion-card {
-                background-color: #f8f9fa;
-                padding: 15px;
-                border-radius: 6px;
-                height: 100%;
-            }
-            .suggestion-title {
-                color: #2c3e50;
-                margin-top: 0;
-                margin-bottom: 8px;
-            }
-            .suggestion-card p {
-                margin: 0;
-                color: #7f8c8d;
-                font-size: 0.9rem;
-            }
-            .confirmation-container {
-                text-align: center;
-                padding: 20px 0;
             }
         </style>
     </head>

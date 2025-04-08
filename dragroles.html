@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workforce Management Schedule</title>
+    <link rel="stylesheet" href="dragroles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="calendar">
+            <button id="prev-week" class="week-btn">&#8592; Previous Week</button>
+            <input type="date" id="calendar">
+            <button id="next-week" class="week-btn">Next Week &#8594;</button>
+        </div>
+        
+        <div class="table-header">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roles</th>
+                        <th>Monday <br> <span class="date"></span></th>
+                        <th>Tuesday <br> <span class="date"></span></th>
+                        <th>Wednesday <br> <span class="date"></span></th>
+                        <th>Thursday <br> <span class="date"></span></th>
+                        <th>Friday <br> <span class="date"></span></th>
+                        <th>Saturday <br> <span class="date"></span></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        
+        <table>
+            <tbody>
+                <tr>
+                    <td class="roles">  <!-- Available roles -->
+                        <div class="role" draggable="true" id="role1">MANAGER</div>
+                        <div class="role" draggable="true" id="role2">assistant</div>
+                        <div class="role" draggable="true" id="role3">technical asisstance</div>
+                        <div class="role" draggable="true" id="role4">designer</div>
+                        <div class="role" draggable="true" id="role5">tester</div>
+                    </td>
+                    
+                    <!-- Drop zones with shift timings -->
+                    <td class="day">
+                        <div class="drop-zone" id="m-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="m-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="m-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                    <td class="day">
+                        <div class="drop-zone" id="t-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="t-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="t-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                    <td class="day">
+                        <div class="drop-zone" id="w-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="w-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="w-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                    <td class="day">
+                        <div class="drop-zone" id="th-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="th-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="th-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                    <td class="day">
+                        <div class="drop-zone" id="f-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="f-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="f-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                    <td class="day">
+                        <div class="drop-zone" id="s-session1">Shift 1: 9:00 AM - 12:00 PM</div>
+                        <div class="drop-zone" id="s-session2">Shift 2: 1:00 PM - 6:00 PM</div>
+                        <div class="drop-zone" id="s-session3">Shift 3: 6:00 PM - 11:30 PM</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+            
+        
+        <!-- Save Button -->
+        <button id="save-schedule">Save Schedule</button>
+        <button id="load-schedule">Load Schedule</button>
+
+    </div>
+
+    
+    <div class="worker-assignment-section">
+        <h3 class="worker-assignment-title">Assign Workers by Role</h3>
+        <div class="worker-role-buttons">
+            <button type="button" class="worker-role-btn" data-worker-role="Site Supervisor / Foreman">Supervisor</button>
+            <button type="button" class="worker-role-btn" data-worker-role="General Laborer">Laborer</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Electrician">Electrician</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Plumber">Plumber</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Carpenter">Carpenter</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Mason">Mason</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Welder">Welder</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Crane Operator / Heavy Equipment Operator">Operator</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Truck Driver / Material Transporter">Driver</button>
+            <button type="button" class="worker-role-btn" data-worker-role="Security Guard">Security</button>
+        </div>
+    </div>
+    
+        
+        <div class="worker-list-container">
+            <div class="worker-table-header">
+                <div class="worker-header-row">
+                    <div class="worker-id-header">ID</div>
+                    <div class="worker-name-header">Name</div>
+                    <div class="worker-role-header">Role</div>
+                    <div class="worker-contact-header">Contact</div>
+                </div>
+            </div>
+        
+            <div id="worker-data-list">
+                <!-- Example entry; repeat dynamically for each worker -->
+                <div class="worker-bar">
+                    <div class="worker-id-header">#01</div>
+                    <div class="worker-name-header">John Doe</div>
+                    <div class="worker-role-header">Electrician</div>
+                    <div class="worker-contact-header">+91 9876543210</div>
+                </div>
+                <!-- More bars can be added dynamically -->
+            </div>
+        </div>
+    
+    <script src="dragroles.js" defer></script>
+</body>
+</html>

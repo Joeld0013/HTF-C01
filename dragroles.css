@@ -1,0 +1,221 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+    padding: 0;
+}
+
+.container {
+    width: 95%;
+    padding: 30px;
+    margin: auto;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    border: 2px solid black;
+    transition: all 0.3s ease-in-out;
+}
+
+.calendar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.calendar input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: 0.3s;
+    background: rgb(12, 78, 122);
+    color: white;
+}
+
+.calendar input:hover {
+    border-color: #007bff;
+}
+
+/* Styling for Previous & Next Week Buttons */
+.prev-week-btn, .next-week-btn {
+    background-color: rgb(12, 78, 122);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    margin: 5px;
+}
+
+.prev-week-btn:hover, .next-week-btn:hover {
+    background-color: #0056b3;
+}
+
+.table-header {
+    position: relative;
+    left: 01px;
+}
+
+.roles {
+    background: rgb(12, 78, 122);
+    width: 150px;
+    vertical-align: top;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ffffff;
+}
+
+.role {
+    background: rgb(12, 78, 122);
+    color: white;
+    padding: 12px;
+    margin: 10px 0;
+    text-align: center;
+    cursor: grab;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(241, 241, 241, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+
+.role:active {
+    transform: none;
+}
+
+.drop-zone {
+    height: 60px;
+    background: #e9ecef;
+    border: 2px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 10px 0;
+}
+
+.drop-zone:hover {
+    background: #dcdcdc;
+    transform: scale(1.05);
+}
+
+/* Day Headers */
+.day-header {
+    font-weight: bold;
+    text-align: center;
+}
+
+.date {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    background: rgb(12, 78, 122);
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+tbody td {
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+
+
+#save-schedule{
+    background: rgb(12, 78, 122);
+    color: white;
+    width: 100px;
+    position: absolute;
+    right: 60px;
+    top: 525px;
+}
+
+
+
+/*==================================*/
+.worker-list-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.worker-table-header {
+    margin-bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+}
+
+.worker-header-row {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#worker-data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.worker-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 12px 15px;
+    border-left: 5px solid #007bff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.worker-bar:hover {
+    transform: scale(1.01);
+    background-color: #f0f8ff;
+}
+
+/* Keep consistent widths if needed */
+.worker-id-header,
+.worker-name-header,
+.worker-role-header,
+.worker-contact-header {
+    flex: 1;
+    text-align: left;
+    font-size: 15px;
+}
+
+.worker-role-btn {
+    width: 120px;
+    height: 40px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.worker-role-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
