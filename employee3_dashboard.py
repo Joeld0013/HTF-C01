@@ -157,7 +157,7 @@ def get_weather_icon(icon_code):
 
 # Usage with fallback to sample data
 api_key = "adeb8ce5ba02e4a09b6befe21d7144a9"  # Replace with your actual API key
-city_name = "Bangalore "
+city_name = ""
 
 weather_data = get_weather_data(api_key, city_name)
 
@@ -784,4 +784,4 @@ app.index_string = '''
 '''
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=8061)
