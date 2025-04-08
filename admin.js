@@ -44,7 +44,7 @@ const roleMap = {
   "Welder": "welder",
   "Crane Operator / Heavy Equipment Operator": "craneoperator",
   "Truck Driver / Material Transporter": "truckdriver",
-  "Security Guard": "securityguard",
+  "Security Guard": "securityguard"
 };
 
 // Function to set role from navbar buttons
@@ -186,3 +186,9 @@ function resetForm() {
   document.querySelector('input[name="idOption"][value="auto"]').checked = true;
   document.getElementById("employeeId").style.display = "none";
 }
+
+
+
+
+
+///////////////////////////////////////////////
