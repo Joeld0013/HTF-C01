@@ -3,128 +3,1003 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workforce Management Schedule</title>
-    <link rel="stylesheet" href="voicedrag.css">
+    <title>Workforce Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #5bc0de;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --white: #fff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Calendar Navigation */
+        .calendar-nav {
+            background-color: var(--white);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .week-navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .week-display {
+            font-weight: bold;
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .nav-button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-button:hover {
+            background-color: #3a5a8a;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Schedule Table */
+        .schedule-container {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        .schedule-table th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 12px;
+            text-align: center;
+            position: sticky;
+            top: 140px;
+            z-index: 998;
+        }
+        
+        .schedule-table td {
+            border: 1px solid var(--medium-gray);
+            vertical-align: top;
+            padding: 0;
+        }
+        
+        .roles-column {
+            width: 180px;
+            background-color: #f8f9fa;
+            position: sticky;
+            left: 0;
+            z-index: 997;
+            padding: 10px;
+        }
+        
+        .day-column {
+            width: calc((100% - 180px) / 6);
+            min-width: 180px;
+        }
+        
+        /* Roles */
+        .roles-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .role {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 10px;
+            border-radius: 4px;
+            cursor: move;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .role:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .role.dragging {
+            opacity: 0.8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 1001;
+        }
+        
+        /* Drop Zones */
+        .drop-zone {
+            min-height: 100px;
+            padding: 10px;
+            margin: 5px;
+            background-color: #f0f4f8;
+            border: 2px dashed #b8c2cc;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .drop-zone.highlight {
+            background-color: #e1e8ed;
+            border-color: var(--primary-color);
+        }
+        
+        .shift-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .assigned-role {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .assigned-workers {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .worker-badge {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .worker-badge .remove-worker {
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        /* Worker Assignment Section */
+        .worker-section {
+            margin-top: 30px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .section-title {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .worker-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .role-select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            max-width: 300px;
+        }
+        
+        .fetch-button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .fetch-button:hover {
+            background-color: #3a5a8a;
+        }
+        
+        .worker-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .worker-card {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--medium-gray);
+            cursor: move;
+            transition: transform 0.2s;
+        }
+        
+        .worker-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .worker-card.dragging {
+            opacity: 0.5;
+            background-color: #e1e8ed;
+        }
+        
+        .worker-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .worker-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--medium-gray);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .worker-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .worker-details {
+            flex: 1;
+        }
+        
+        .worker-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .worker-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .schedule-table {
+                width: 1200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .week-navigation {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .worker-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .role-select {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">Workforce Scheduler</div>
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span>Admin</span>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
-        <div class="calendar">
-            <button id="prev-week" class="week-btn">&#8592; Previous Week</button>
-            <input type="date" id="calendar">
-            <button id="next-week" class="week-btn">Next Week &#8594;</button>
+        <div class="calendar-nav">
+            <div class="week-navigation">
+                <button class="nav-button" id="prev-week">
+                    <i class="fas fa-chevron-left"></i> Previous Week
+                </button>
+                <div class="week-display" id="week-display">Week of May 27, 2024 to June 1, 2024</div>
+                <button class="nav-button" id="next-week">
+                    Next Week <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="action-buttons">
+                <button class="nav-button" id="save-schedule">
+                    <i class="fas fa-save"></i> Save Schedule
+                </button>
+                <button class="nav-button" id="load-schedule">
+                    <i class="fas fa-folder-open"></i> Load Schedule
+                </button>
+            </div>
         </div>
         
-        <div class="table-header">
-            <table>
+        <div class="schedule-container">
+            <table class="schedule-table">
                 <thead>
                     <tr>
-                        <th>Roles</th>
-                        <th>Monday <br> <span class="date"></span></th>
-                        <th>Tuesday <br> <span class="date"></span></th>
-                        <th>Wednesday <br> <span class="date"></span></th>
-                        <th>Thursday <br> <span class="date"></span></th>
-                        <th>Friday <br> <span class="date"></span></th>
-                        <th>Saturday <br> <span class="date"></span></th>
+                        <th class="roles-column">Roles</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
                     </tr>
                 </thead>
+                <tbody>
+                    <tr>
+                        <td class="roles-column">
+                            <div class="roles-container">
+                                <div class="role" draggable="true" data-role="MANAGER">MANAGER</div>
+                                <div class="role" draggable="true" data-role="ASSISTANT">ASSISTANT</div>
+                                <div class="role" draggable="true" data-role="FOREMAN">FOREMAN</div>
+                                <div class="role" draggable="true" data-role="SAFETY_OFFICER">SAFETY OFFICER</div>
+                                <div class="role" draggable="true" data-role="EQUIPMENT_OPERATOR">EQUIPMENT OPERATOR</div>
+                                <div class="role" draggable="true" data-role="LABORER">LABORER</div>
+                                <div class="role" draggable="true" data-role="ELECTRICIAN">ELECTRICIAN</div>
+                                <div class="role" draggable="true" data-role="P">Plumber</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="monday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="monday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="monday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="tuesday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="tuesday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="tuesday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="wednesday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="wednesday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="wednesday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="thursday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="thursday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="thursday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="friday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="friday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="friday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                        <td class="day-column">
+                            <div class="drop-zone" data-day="saturday" data-shift="1">
+                                <div class="shift-header">Shift 1: 9:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="saturday" data-shift="2">
+                                <div class="shift-header">Shift 2: 1:00 PM - 6:00 PM</div>
+                            </div>
+                            <div class="drop-zone" data-day="saturday" data-shift="3">
+                                <div class="shift-header">Shift 3: 6:00 PM - 11:30 PM</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
         
-        <table>
-            <tbody>
-                <tr>
-                    <td class="roles">  <!-- Available roles -->
-                        <div class="role" draggable="true" id="role1">MANAGER</div>
-                        <div class="role" draggable="true" id="role2">assistant</div>
-                        <div class="role" draggable="true" id="role3">technical asisstance</div>
-                        <div class="role" draggable="true" id="role4">designer</div>
-                        <div class="role" draggable="true" id="role5">tester</div>
-                    </td>
-                    
-                    <!-- Drop zones with shift timings -->
-                    <td class="day">
-                        <div class="drop-zone" id="m-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="m-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="m-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                    <td class="day">
-                        <div class="drop-zone" id="t-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="t-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="t-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                    <td class="day">
-                        <div class="drop-zone" id="w-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="w-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="w-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                    <td class="day">
-                        <div class="drop-zone" id="th-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="th-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="th-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                    <td class="day">
-                        <div class="drop-zone" id="f-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="f-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="f-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                    <td class="day">
-                        <div class="drop-zone" id="s-session1">Shift 1: 9:00 AM - 12:00 PM</div>
-                        <div class="drop-zone" id="s-session2">Shift 2: 1:00 PM - 6:00 PM</div>
-                        <div class="drop-zone" id="s-session3">Shift 3: 6:00 PM - 11:30 PM</div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="worker-section">
+            <h2 class="section-title">Worker Assignment</h2>
+            <div class="worker-controls">
+                <select class="role-select" id="role-select">
+                    <option value="">Select Role</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ASSISTANT">Assistant</option>
+                    <option value="FOREMAN">Foreman</option>
+                    <option value="SAFETY_OFFICER">Safety Officer</option>
+                    <option value="EQUIPMENT_OPERATOR">Equipment Operator</option>
+                    <option value="LABORER">Laborer</option>
+                    <option value="ELECTRICIAN">Electrician</option>
+                    <option value="PLUMBER">Plumber</option>
+                </select>
+                <button class="fetch-button" id="fetch-workers">
+                    <i class="fas fa-users"></i> Fetch Workers
+                </button>
+            </div>
+            <div class="worker-list" id="worker-list">
+                <!-- Workers will be loaded here -->
+                <div class="empty-state">Select a role and click "Fetch Workers" to see available employees</div>
+            </div>
+        </div>
+    </div>
 
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Current week tracking
+    let currentWeekStart = getMonday(new Date());
+    let scheduleData = {};
+    let allWorkers = {}; // Cache for worker data
+    
+    // DOM elements
+    const weekDisplay = document.getElementById('week-display');
+    const prevWeekBtn = document.getElementById('prev-week');
+    const nextWeekBtn = document.getElementById('next-week');
+    const saveBtn = document.getElementById('save-schedule');
+    const loadBtn = document.getElementById('load-schedule');
+    const roleSelect = document.getElementById('role-select');
+    const fetchWorkersBtn = document.getElementById('fetch-workers');
+    const workerList = document.getElementById('worker-list');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const roles = document.querySelectorAll('.role');
+    
+    // Initialize
+    updateWeekDisplay();
+    setupDragAndDrop();
+    loadScheduleForWeek();
+    
+    // Event listeners
+    prevWeekBtn.addEventListener('click', () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        updateWeekDisplay();
+        loadScheduleForWeek();
+    });
+    
+    nextWeekBtn.addEventListener('click', () => {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        updateWeekDisplay();
+        loadScheduleForWeek();
+    });
+    
+    saveBtn.addEventListener('click', saveSchedule);
+    loadBtn.addEventListener('click', loadScheduleForWeek);
+    fetchWorkersBtn.addEventListener('click', fetchWorkers);
+    
+    // Functions
+    function getMonday(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+        return new Date(d.setDate(diff));
+    }
+    
+    function updateWeekDisplay() {
+        const weekEnd = new Date(currentWeekStart);
+        weekEnd.setDate(weekEnd.getDate() + 5); // Monday to Saturday
+        
+        weekDisplay.textContent = `Week of ${formatDate(currentWeekStart)} to ${formatDate(weekEnd)}`;
+    }
+    
+    function formatDate(date) {
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+    }
+    
+    function formatDateForStorage(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    function setupDragAndDrop() {
+        // Role drag events
+        roles.forEach(role => {
+            role.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: 'role',
+                    role: this.getAttribute('data-role')
+                }));
+                this.classList.add('dragging');
+            });
             
+            role.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+            });
+        });
         
-        <!-- Save Button -->
-        <button id="save-schedule">Save Schedule</button>
-        <button id="load-schedule">Load Schedule</button>
-
-    </div>
-
+        // Drop zone events
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('highlight');
+            });
+            
+            zone.addEventListener('dragleave', function() {
+                this.classList.remove('highlight');
+            });
+            
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('highlight');
+                
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                const day = this.getAttribute('data-day');
+                const shift = this.getAttribute('data-shift');
+                const weekKey = formatDateForStorage(currentWeekStart);
+                
+                if (data.type === 'role') {
+                    handleRoleAssignment(this, day, shift, weekKey, data.role);
+                } else if (data.type === 'worker') {
+                    handleWorkerAssignment(this, day, shift, weekKey, data);
+                }
+            });
+        });
+    }
     
-    <div class="worker-assignment-section">
-        <h3 class="worker-assignment-title">Assign Workers by Role</h3>
-        <div class="worker-role-buttons">
-            <button type="button" class="worker-role-btn" data-worker-role="Site Supervisor / Foreman">Supervisor</button>
-            <button type="button" class="worker-role-btn" data-worker-role="General Laborer">Laborer</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Electrician">Electrician</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Plumber">Plumber</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Carpenter">Carpenter</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Mason">Mason</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Welder">Welder</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Crane Operator / Heavy Equipment Operator">Operator</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Truck Driver / Material Transporter">Driver</button>
-            <button type="button" class="worker-role-btn" data-worker-role="Security Guard">Security</button>
-        </div>
-    </div>
-    
+    function handleRoleAssignment(zone, day, shift, weekKey, role) {
+        // Check if role already exists in this shift
+        const existingRole = zone.querySelector('.assigned-role');
+        if (existingRole && existingRole.textContent === role) {
+            return; // Same role, no change needed
+        }
         
-        <div class="worker-list-container">
-            <div class="worker-table-header">
-                <div class="worker-header-row">
-                    <div class="worker-id-header">ID</div>
-                    <div class="worker-name-header">Name</div>
-                    <div class="worker-role-header">Role</div>
-                    <div class="worker-contact-header">Contact</div>
+        // Remove existing role if different
+        if (existingRole) {
+            existingRole.remove();
+            // Also remove any workers assigned to this role
+            const workerBadges = zone.querySelectorAll('.worker-badge');
+            workerBadges.forEach(badge => badge.remove());
+        }
+        
+        // Add the role to the shift
+        const roleElement = document.createElement('div');
+        roleElement.className = 'assigned-role';
+        roleElement.textContent = role;
+        roleElement.setAttribute('data-role', role);
+        zone.insertBefore(roleElement, zone.querySelector('.shift-header').nextSibling);
+        
+        // Create container for workers if it doesn't exist
+        let workersContainer = zone.querySelector('.assigned-workers');
+        if (!workersContainer) {
+            workersContainer = document.createElement('div');
+            workersContainer.className = 'assigned-workers';
+            zone.appendChild(workersContainer);
+        }
+        
+        // Update schedule data
+        if (!scheduleData[weekKey]) {
+            scheduleData[weekKey] = {};
+        }
+        
+        const shiftKey = `${day}-${shift}`;
+        scheduleData[weekKey][shiftKey] = {
+            role: role,
+            workers: []
+        };
+    }
+    
+    function handleWorkerAssignment(zone, day, shift, weekKey, workerData) {
+        // Assign worker to this shift if the role matches
+        const assignedRole = zone.querySelector('.assigned-role');
+        if (!assignedRole) {
+            alert('Please assign a role to this shift before assigning workers');
+            return;
+        }
+        
+        if (assignedRole.getAttribute('data-role') !== workerData.role) {
+            alert(`This worker is a ${workerData.role} but the shift requires ${assignedRole.getAttribute('data-role')}`);
+            return;
+        }
+        
+        // Check if worker is already assigned
+        const existingWorker = zone.querySelector(`.worker-badge[data-worker-id="${workerData.id}"]`);
+        if (existingWorker) {
+            alert('This worker is already assigned to this shift');
+            return;
+        }
+        
+        // Add worker badge
+        const workerBadge = document.createElement('div');
+        workerBadge.className = 'worker-badge';
+        workerBadge.setAttribute('data-worker-id', workerData.id);
+        workerBadge.innerHTML = `
+            ${workerData.name} (ID: ${workerData.id})
+            <span class="remove-worker" title="Remove worker">&times;</span>
+        `;
+        
+        // Add click handler for remove button
+        workerBadge.querySelector('.remove-worker').addEventListener('click', function(e) {
+            e.stopPropagation();
+            removeWorkerFromShift(day, shift, workerData.id);
+            workerBadge.remove();
+        });
+        
+        // Ensure workers container exists
+        let workersContainer = zone.querySelector('.assigned-workers');
+        if (!workersContainer) {
+            workersContainer = document.createElement('div');
+            workersContainer.className = 'assigned-workers';
+            zone.appendChild(workersContainer);
+        }
+        
+        workersContainer.appendChild(workerBadge);
+        
+        // Update schedule data
+        const shiftKey = `${day}-${shift}`;
+        if (!scheduleData[weekKey][shiftKey].workers) {
+            scheduleData[weekKey][shiftKey].workers = [];
+        }
+        
+        scheduleData[weekKey][shiftKey].workers.push({
+            id: workerData.id,
+            name: workerData.name
+        });
+    }
+    
+    function removeWorkerFromShift(day, shift, workerId) {
+        const weekKey = formatDateForStorage(currentWeekStart);
+        const shiftKey = `${day}-${shift}`;
+        
+        if (scheduleData[weekKey] && scheduleData[weekKey][shiftKey]) {
+            scheduleData[weekKey][shiftKey].workers = 
+                scheduleData[weekKey][shiftKey].workers.filter(w => w.id !== workerId);
+        }
+    }
+    
+    async function fetchWorkers() {
+        const role = roleSelect.value;
+        if (!role) {
+            alert('Please select a role first');
+            return;
+        }
+        
+        try {
+            // Check if we already have these workers cached
+            if (allWorkers[role]) {
+                displayWorkers(allWorkers[role], role);
+                return;
+            }
+            
+            workerList.innerHTML = '<div class="loading">Loading workers...</div>';
+            
+            const response = await fetch(`api.php?action=get_workers&role=${encodeURIComponent(role)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const workers = await response.json();
+            if (workers.error) {
+                throw new Error(workers.error);
+            }
+            
+            // Cache the workers
+            allWorkers[role] = workers;
+            
+            displayWorkers(workers, role);
+        } catch (error) {
+            console.error('Error fetching workers:', error);
+            workerList.innerHTML = `<div class="error">Error loading workers: ${error.message}</div>`;
+        }
+    }
+    
+    function displayWorkers(workers, role) {
+        workerList.innerHTML = '';
+        
+        if (workers.length === 0) {
+            workerList.innerHTML = '<div class="empty-state">No workers found for this role</div>';
+            return;
+        }
+        
+        workers.forEach(worker => {
+            const workerCard = document.createElement('div');
+            workerCard.className = 'worker-card';
+            workerCard.setAttribute('draggable', 'true');
+            workerCard.setAttribute('data-worker-id', worker.id);
+            workerCard.setAttribute('data-worker-name', worker.name);
+            workerCard.setAttribute('data-worker-role', worker.role);
+            
+            workerCard.innerHTML = `
+                <div class="worker-info">
+                    <div class="worker-avatar">
+                        ${worker.photo ? 
+                            `<img src="data:image/jpeg;base64,${worker.photo}" alt="${worker.name}">` : 
+                            `<i class="fas fa-user"></i>`}
+                    </div>
+                    <div class="worker-details">
+                        <div class="worker-name">${worker.name}</div>
+                        <div class="worker-meta">
+                            <div>ID: ${worker.id}</div>
+                            <div>Role: ${worker.role}</div>
+                            <div>${worker.gender}, ${worker.age} years</div>
+                            <div>${worker.email}</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        
-            <div id="worker-data-list">
-                <!-- Example entry; repeat dynamically for each worker -->
-                <div class="worker-bar">
-                    <div class="worker-id-header">#01</div>
-                    <div class="worker-name-header">John Doe</div>
-                    <div class="worker-role-header">Electrician</div>
-                    <div class="worker-contact-header">+91 9876543210</div>
-                </div>
-                <!-- More bars can be added dynamically -->
-            </div>
-        </div>
+            `;
+            
+            workerCard.addEventListener('dragstart', function(e) {
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: 'worker',
+                    id: worker.id,
+                    name: worker.name,
+                    role: worker.role
+                }));
+            });
+            
+            workerCard.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+            });
+            
+            workerList.appendChild(workerCard);
+        });
+    }
     
-    <script src="voicedrag.js" defer></script>
+    async function saveSchedule() {
+        const weekKey = formatDateForStorage(currentWeekStart);
+        
+        try {
+            // Prepare assignments for saving
+            const assignmentsToSave = [];
+            
+            if (scheduleData[weekKey]) {
+                for (const [shiftKey, shiftData] of Object.entries(scheduleData[weekKey])) {
+                    const [day, shift] = shiftKey.split('-');
+                    
+                    if (shiftData.workers && shiftData.workers.length > 0) {
+                        shiftData.workers.forEach(worker => {
+                            assignmentsToSave.push({
+                                day,
+                                shift,
+                                role: shiftData.role,
+                                employeeId: worker.id
+                            });
+                        });
+                    }
+                }
+            }
+            
+            const response = await fetch('api.php?action=save_schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    weekStart: weekKey,
+                    assignments: assignmentsToSave
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            
+            alert('Schedule saved successfully!');
+        } catch (error) {
+            console.error('Error saving schedule:', error);
+            alert(`Failed to save schedule: ${error.message}`);
+        }
+    }
+    
+    async function loadScheduleForWeek() {
+        const weekKey = formatDateForStorage(currentWeekStart);
+        
+        try {
+            // Clear current assignments
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const roleElement = zone.querySelector('.assigned-role');
+                const workersContainer = zone.querySelector('.assigned-workers');
+                if (roleElement) roleElement.remove();
+                if (workersContainer) workersContainer.remove();
+            });
+            
+            // Initialize empty schedule for this week
+            if (!scheduleData[weekKey]) {
+                scheduleData[weekKey] = {};
+            }
+            
+            // Load from server
+            const response = await fetch(`api.php?action=load_schedule&weekStart=${weekKey}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const assignments = await response.json();
+            if (assignments.error) {
+                throw new Error(assignments.error);
+            }
+            
+            // Group assignments by shift
+            const assignmentsByShift = {};
+            assignments.forEach(assignment => {
+                const shiftKey = `${assignment.day}-${assignment.shift}`;
+                if (!assignmentsByShift[shiftKey]) {
+                    assignmentsByShift[shiftKey] = {
+                        role: assignment.role,
+                        workers: []
+                    };
+                }
+                
+                if (assignment.employeeId) {
+                    assignmentsByShift[shiftKey].workers.push({
+                        id: assignment.employeeId,
+                        name: assignment.employeeName || `Worker ${assignment.employeeId}`
+                    });
+                }
+            });
+            
+            // Update UI and schedule data
+            for (const [shiftKey, data] of Object.entries(assignmentsByShift)) {
+                const [day, shift] = shiftKey.split('-');
+                const zone = document.querySelector(`.drop-zone[data-day="${day}"][data-shift="${shift}"]`);
+                
+                if (zone) {
+                    // Add role
+                    const roleElement = document.createElement('div');
+                    roleElement.className = 'assigned-role';
+                    roleElement.textContent = data.role;
+                    roleElement.setAttribute('data-role', data.role);
+                    zone.insertBefore(roleElement, zone.querySelector('.shift-header').nextSibling);
+                    
+                    // Add workers container
+                    const workersContainer = document.createElement('div');
+                    workersContainer.className = 'assigned-workers';
+                    
+                    // Add workers
+                    data.workers.forEach(worker => {
+                        const workerBadge = document.createElement('div');
+                        workerBadge.className = 'worker-badge';
+                        workerBadge.setAttribute('data-worker-id', worker.id);
+                        workerBadge.innerHTML = `
+                            ${worker.name} (ID: ${worker.id})
+                            <span class="remove-worker" title="Remove worker">&times;</span>
+                        `;
+                        
+                        workerBadge.querySelector('.remove-worker').addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            removeWorkerFromShift(day, shift, worker.id);
+                            workerBadge.remove();
+                        });
+                        
+                        workersContainer.appendChild(workerBadge);
+                    });
+                    
+                    zone.appendChild(workersContainer);
+                    
+                    // Update schedule data
+                    scheduleData[weekKey][shiftKey] = {
+                        role: data.role,
+                        workers: data.workers
+                    };
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error loading schedule:', error);
+            // Initialize empty schedule for this week if loading fails
+            scheduleData[weekKey] = {};
+        }
+    }
+});
+
+    </script>
 </body>
 </html>
