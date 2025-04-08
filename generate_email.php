@@ -4,11 +4,12 @@ require 'dbconnect.php';
 
 try {
     $role = $_GET['role'] ?? '';
-    $role_short = strtolower(str_replace([' ', '/'], '', explode('(', $role)[0]));
     
-    // Find gaps in existing IDs
-    $stmt = $conn->prepare("SELECT employee_id FROM employee_dash WHERE role = ? ORDER BY employee_id");
-    $stmt->bind_param("s", $role);
+    // Convert role to lowercase and remove spaces/special chars
+    $role_short = strtolower(preg_replace('/[^a-z]/i', '', $role));
+    
+    // Get all existing employee IDs sorted numerically
+    $stmt = $conn->prepare("SELECT employee_id FROM employee_dash ORDER BY CAST(SUBSTRING(employee_id, 3) AS UNSIGNED)");
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -18,7 +19,7 @@ try {
         $existing_ids[] = $num;
     }
     
-    // Find the first available gap or next number
+    // Find the first available gap
     $next_num = 1;
     foreach ($existing_ids as $id) {
         if ($id > $next_num) {
