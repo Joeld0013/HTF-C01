@@ -33,10 +33,10 @@ def get_db_connection():
 def get_employee_data(employee_id="E001"):  # Default ID for testing
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     cursor.execute("SELECT * FROM employee_dash WHERE employee_id = %s", (employee_id,))
     emp_data = cursor.fetchone()
-    
+
     cursor.close()
     conn.close()
     return emp_data
@@ -44,15 +44,15 @@ def get_employee_data(employee_id="E001"):  # Default ID for testing
 def get_attendance_data(employee_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     cursor.execute("""
-        SELECT date, check_in, check_out, overtime_hours, status 
-        FROM attendance_dash 
-        WHERE employee_id = %s 
-        ORDER BY date DESC 
+        SELECT date, check_in, check_out, overtime_hours, status
+        FROM attendance_dash
+        WHERE employee_id = %s
+        ORDER BY date DESC
         LIMIT 5
     """, (employee_id,))
-    
+
     data = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -61,16 +61,16 @@ def get_attendance_data(employee_id):
 def get_leave_data(employee_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     # Get leave history
     cursor.execute("""
-        SELECT leave_type, start_date, end_date, duration, status 
-        FROM leave_dash 
-        WHERE employee_id = %s 
+        SELECT leave_type, start_date, end_date, duration, status
+        FROM leave_dash
+        WHERE employee_id = %s
         ORDER BY start_date DESC
     """, (employee_id,))
     leave_history = cursor.fetchall()
-    
+
     # Get leave balances
     cursor.execute("""
         SELECT annual_leave_balance, annual_leave_total,
@@ -78,11 +78,11 @@ def get_leave_data(employee_id):
                paternity_leave_balance, paternity_leave_total,
                bereavement_leave_balance, bereavement_leave_total,
                sick_leave_taken
-        FROM employee_dash 
+        FROM employee_dash
         WHERE employee_id = %s
     """, (employee_id,))
     leave_balance = cursor.fetchone()
-    
+
     cursor.close()
     conn.close()
     return leave_history, leave_balance
@@ -90,7 +90,7 @@ def get_leave_data(employee_id):
 def get_performance_data(employee_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     # Get monthly performance data
     cursor.execute("""
         SELECT month, performance_score, attendance_score, overtime_hours
@@ -100,7 +100,7 @@ def get_performance_data(employee_id):
         LIMIT 6
     """, (employee_id,))
     monthly_data = cursor.fetchall()
-    
+
     # Get radar chart data
     cursor.execute("""
         SELECT productivity, attendance, communication, collaboration, quality
@@ -110,7 +110,7 @@ def get_performance_data(employee_id):
         LIMIT 1
     """, (employee_id,))
     radar_data = cursor.fetchone()
-    
+
     cursor.close()
     conn.close()
     return monthly_data, radar_data
@@ -118,7 +118,7 @@ def get_performance_data(employee_id):
 def get_task_recommendations(employee_id, role):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     cursor.execute("""
         SELECT priority, task, deadline, status
         FROM task_dash
@@ -126,7 +126,7 @@ def get_task_recommendations(employee_id, role):
         ORDER BY priority_order, deadline
         LIMIT 3
     """, (role,))
-    
+
     tasks = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -137,16 +137,16 @@ def get_weather_data(city="Bangalore"):
     try:
         current_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
         forecast_url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
-        
+
         current_response = requests.get(current_url)
         forecast_response = requests.get(forecast_url)
-        
+
         if current_response.status_code != 200 or forecast_response.status_code != 200:
             return None
-            
+
         current_data = current_response.json()
         forecast_data = forecast_response.json()
-        
+
         weather = {
             'current': {
                 'temp': current_data['main']['temp'],
@@ -157,12 +157,12 @@ def get_weather_data(city="Bangalore"):
             },
             'forecast': []
         }
-        
+
         today = datetime.datetime.now()
         for i in range(3):
             day_name = 'Today' if i == 0 else (today + datetime.timedelta(days=i)).strftime('%A')
             day_data = forecast_data['list'][i*8]
-            
+
             forecast_entry = {
                 'day': day_name,
                 'temp_high': day_data['main']['temp_max'],
@@ -170,9 +170,9 @@ def get_weather_data(city="Bangalore"):
                 'condition': day_data['weather'][0]['description'].title(),
                 'icon': get_weather_icon(day_data['weather'][0]['icon'])
             }
-            
+
             weather['forecast'].append(forecast_entry)
-        
+
         return weather
     except:
         # Return sample data if API call fails
@@ -212,14 +212,14 @@ app.layout = html.Div([
             html.H2("Employee Dashboard", style={"margin-bottom": "10px"}),
             html.Div(id="employee-header")
         ], style={"display": "flex", "flex-direction": "column", "align-items": "center"}),
-        
+
         # Employee selector (simplified for testing)
         html.Div([
-            dcc.Input(id="employee-id-input", type="text", placeholder="Enter Employee ID", 
+            dcc.Input(id="employee-id-input", type="text", placeholder="Enter Employee ID",
                      value="E001", style={"margin-right": "10px"}),
             html.Button("Load Dashboard", id="load-dashboard-btn")
         ], style={"margin": "10px auto", "text-align": "center"}),
-        
+
         dcc.Tabs(id='dashboard-tabs', value='overview', children=[
             dcc.Tab(label='Overview', value='overview'),
             dcc.Tab(label='Attendance', value='attendance'),
@@ -227,7 +227,7 @@ app.layout = html.Div([
             dcc.Tab(label='Performance', value='performance')
         ], style={"margin-top": "20px"})
     ]),
-    
+
     html.Div(id='tab-content', className="tab-content")
 ], className="dashboard-container")
 
@@ -240,12 +240,12 @@ app.layout = html.Div([
 def update_employee_header(n_clicks, employee_id):
     if not employee_id:
         return html.H3("Please enter an Employee ID", style={"color": colors['text']})
-    
+
     emp_data = get_employee_data(employee_id)
     if not emp_data:
         return html.H3(f"Employee {employee_id} not found", style={"color": colors['high']})
-    
-    return html.H3(f"Welcome, {emp_data['name']} ({emp_data['employee_id']}) - {emp_data['role']}", 
+
+    return html.H3(f"Welcome, {emp_data['name']} ({emp_data['employee_id']}) - {emp_data['role']}",
                   style={"color": colors['text'], "font-weight": "normal"})
 
 # Tab content callback
@@ -258,16 +258,16 @@ def update_employee_header(n_clicks, employee_id):
 def render_tab_content(tab, n_clicks, employee_id):
     if not employee_id:
         return html.Div("Please enter an Employee ID and click Load Dashboard")
-    
+
     emp_data = get_employee_data(employee_id)
     if not emp_data:
         return html.Div(f"Employee {employee_id} not found")
-    
+
     if tab == 'overview':
         weather_data = get_weather_data()
         tasks = get_task_recommendations(employee_id, emp_data['role'])
         monthly_data, _ = get_performance_data(employee_id)
-        
+
         return html.Div([
             # First row: Weather & Tasks
             html.Div([
@@ -276,68 +276,68 @@ def render_tab_content(tab, n_clicks, employee_id):
                     html.H4("Weather Report", className="card-title"),
                     create_weather_widget(weather_data)
                 ], className="card flex-1"),
-                
+
                 # Task Recommendations
                 html.Div([
                     html.H4("Task Recommendations", className="card-title"),
                     create_tasks_table(tasks)
                 ], className="card flex-1")
             ], className="card-row"),
-            
+
             # Second row: Employee Info & Performance Insights
             html.Div([
                 html.Div([
                     html.H4("Personal Information", className="card-title"),
                     create_employee_info(emp_data)
                 ], className="card flex-1"),
-                
+
                 html.Div([
                     html.H4("Performance Insights", className="card-title"),
                     create_performance_insights(monthly_data)
                 ], className="card flex-1")
             ], className="card-row"),
-            
+
             # Performance chart
             html.Div([
                 dcc.Graph(figure=create_performance_chart(monthly_data))
             ], className="card")
         ])
-        
+
     elif tab == 'attendance':
         attendance_data = get_attendance_data(employee_id)
         monthly_data, _ = get_performance_data(employee_id)
-        
+
         return html.Div([
             html.Div([
                 html.H4("Recent Attendance", className="card-title"),
                 create_attendance_table(attendance_data)
             ], className="card"),
-            
+
             html.Div([
                 dcc.Graph(figure=create_overtime_chart(monthly_data))
             ], className="card")
         ])
-        
+
     elif tab == 'leave':
         leave_history, leave_balance = get_leave_data(employee_id)
-        
+
         return html.Div([
             html.Div([
                 html.Div([
                     html.H4("Leave Balance", className="card-title"),
                     dcc.Graph(figure=create_leave_balance_chart(leave_balance))
                 ], className="card flex-1"),
-                
+
                 html.Div([
                     html.H4("Leave History", className="card-title"),
                     create_leave_history_table(leave_history)
                 ], className="card flex-1")
             ], className="card-row")
         ])
-        
+
     elif tab == 'performance':
         _, radar_data = get_performance_data(employee_id)
-        
+
         return html.Div([
             html.Div([
                 html.H4("Performance Overview", className="card-title"),
@@ -349,7 +349,7 @@ def render_tab_content(tab, n_clicks, employee_id):
 def create_weather_widget(weather_data):
     if not weather_data:
         return html.Div("Weather data unavailable")
-    
+
     return html.Div([
         html.Div([
             html.Div([
@@ -364,13 +364,13 @@ def create_weather_widget(weather_data):
                 html.P(f"Wind: {weather_data['current']['wind_speed']} km/h")
             ], className="weather-details")
         ], className="weather-main"),
-        
+
         html.Div([
             html.Div([
                 html.H5(day['day']),
                 html.Span(day['icon'], className="forecast-icon"),
                 html.P(f"{day['temp_high']}°/{day['temp_low']}°")
-            ], className="forecast-day") 
+            ], className="forecast-day")
             for day in weather_data['forecast']
         ], className="weather-forecast")
     ])
@@ -378,7 +378,7 @@ def create_weather_widget(weather_data):
 def create_tasks_table(tasks):
     if not tasks:
         return html.Div("No tasks available")
-    
+
     return html.Div([
         html.Table([
             html.Thead(html.Tr([html.Th(col) for col in ['Priority', 'Task', 'Deadline', 'Status']])),
@@ -420,20 +420,20 @@ def create_employee_info(emp_data):
 def create_performance_insights(monthly_data):
     if not monthly_data:
         return html.Div("Performance data unavailable")
-    
+
     # Calculate averages from monthly data
     perf_scores = [m.get('performance_score', 0) for m in monthly_data]
     att_scores = [m.get('attendance_score', 0) for m in monthly_data]
     overtime_hrs = [m.get('overtime_hours', 0) for m in monthly_data]
-    
+
     avg_perf = sum(perf_scores) / len(perf_scores) if perf_scores else 0
     avg_att = sum(att_scores) / len(att_scores) if att_scores else 0
     avg_overtime = sum(overtime_hrs) / len(overtime_hrs) if overtime_hrs else 0
-    
+
     # Ratings and colors
     perf_rating = "High" if avg_perf > 85 else "Medium" if avg_perf > 70 else "Low"
     perf_color = "#27ae60" if perf_rating == "High" else "#f39c12" if perf_rating == "Medium" else "#e74c3c"
-    
+
     return html.Div([
         html.Div([
             html.Div([
@@ -454,15 +454,15 @@ def create_performance_insights(monthly_data):
 def create_performance_chart(monthly_data):
     if not monthly_data:
         return {}
-    
+
     months = [m.get('month', '') for m in monthly_data]
     performance = [m.get('performance_score', 0) for m in monthly_data]
     attendance = [m.get('attendance_score', 0) for m in monthly_data]
-    
+
     return {
         'data': [
             go.Scatter(
-                x=months, 
+                x=months,
                 y=performance,
                 mode='lines+markers',
                 name='Performance',
@@ -470,7 +470,7 @@ def create_performance_chart(monthly_data):
                 marker=dict(size=8)
             ),
             go.Scatter(
-                x=months, 
+                x=months,
                 y=attendance,
                 mode='lines+markers',
                 name='Attendance',
@@ -492,7 +492,7 @@ def create_performance_chart(monthly_data):
 def create_attendance_table(attendance_data):
     if attendance_data.empty:
         return html.Div("No attendance data available")
-    
+
     return html.Div([
         html.Table([
             html.Thead(html.Tr([html.Th(col) for col in ['Date', 'Check In', 'Check Out', 'Overtime', 'Status']])),
@@ -511,10 +511,10 @@ def create_attendance_table(attendance_data):
 def create_overtime_chart(monthly_data):
     if not monthly_data:
         return {}
-    
+
     months = [m.get('month', '') for m in monthly_data]
     overtime = [m.get('overtime_hours', 0) for m in monthly_data]
-    
+
     return {
         'data': [go.Bar(x=months, y=overtime, marker_color=colors['accent'])],
         'layout': go.Layout(
@@ -529,7 +529,7 @@ def create_overtime_chart(monthly_data):
 def create_leave_balance_chart(leave_balance):
     if not leave_balance:
         return {}
-    
+
     leave_types = ['Annual', 'Parental', 'Paternity', 'Bereavement']
     leave_remaining = [
         leave_balance.get('annual_leave_balance', 0),
@@ -544,7 +544,7 @@ def create_leave_balance_chart(leave_balance):
         leave_balance.get('bereavement_leave_total', 0)
     ]
     leave_used = [t - r for t, r in zip(leave_total, leave_remaining)]
-    
+
     return {
         'data': [
             go.Bar(x=leave_types, y=leave_remaining, name='Remaining', marker_color=colors['primary']),
@@ -564,7 +564,7 @@ def create_leave_balance_chart(leave_balance):
 def create_leave_history_table(leave_history):
     if not leave_history:
         return html.Div("No leave history available")
-    
+
     return html.Div([
         html.Table([
             html.Thead(html.Tr([html.Th(col) for col in ['Type', 'Start Date', 'End Date', 'Duration', 'Status']])),
@@ -583,7 +583,7 @@ def create_leave_history_table(leave_history):
 def create_radar_chart(radar_data):
     if not radar_data:
         return {}
-    
+
     categories = ['Productivity', 'Attendance', 'Communication', 'Collaboration', 'Quality']
     values = [
         radar_data.get('productivity', 0),
@@ -592,7 +592,7 @@ def create_radar_chart(radar_data):
         radar_data.get('collaboration', 0),
         radar_data.get('quality', 0)
     ]
-    
+
     return {
         'data': [
             go.Scatterpolar(
@@ -800,4 +800,4 @@ app.index_string = '''
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True , port="8052")
+    app.run(debug=True , port="8056")

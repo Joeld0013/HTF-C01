@@ -21,17 +21,17 @@
             z-index: 1000;
             animation: fadeIn 0.3s;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; top: 0; }
             to { opacity: 1; top: 20px; }
         }
-        
+
         .close-popup {
             margin-left: 15px;
             cursor: pointer;
         }
-        
+
         .error-message {
             color: #dc3545;
             background-color: #f8d7da;
@@ -56,7 +56,7 @@
             <span>Neuro Schedule</span>
         </div>
         <div class="title">Welcome back...!<br>Sign in to your account</div>
-        
+
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email address</label>
@@ -69,8 +69,8 @@
                     <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
                 </div>
             </div>
-            <button type="submit" class="login-btn">Sign in</button>
-            
+            <button type="submit" class="login-btn">USER</button>
+
             <div class="divider">or</div>
 
             <div class="footer-links">
@@ -78,11 +78,11 @@
                 <a href="#">Contact support</a>
             </div>
         </form>
-        
+
         <!-- Error message display -->
         <div id="error-message" class="error-message"></div>
     </div>
-            
+
             <div class="divider">or</div>
 
             <div class="footer-links">
@@ -99,9 +99,9 @@
     <div class="workforce-description">
         <h3>NeuroSchedule Workforce</h3>
         <p>
-            A modern workforce management platform designed for precision scheduling, 
-            task allocation, and team coordination. Streamline shift planning, 
-            track productivity, and optimize labor resources with intelligent 
+            A modern workforce management platform designed for precision scheduling,
+            task allocation, and team coordination. Streamline shift planning,
+            track productivity, and optimize labor resources with intelligent
             automation and real-time analytics.
         </p>
     </div>
@@ -114,7 +114,7 @@
             this.classList.toggle('fa-eye');
             this.classList.toggle('fa-eye-slash');
         });
-        
+
         // Error handling functions
         function showError(message) {
             const popup = document.getElementById('errorPopup');
@@ -122,15 +122,15 @@
             popup.style.display = 'block';
             setTimeout(hideError, 5000);
         }
-        
+
         function hideError() {
             document.getElementById('errorPopup').style.display = 'none';
         }
-        
+
         // Main login form handler
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorElement = document.getElementById('error-message');
@@ -153,7 +153,7 @@
 
                 if (result.success) {
                     // Successful login - redirect immediately
-                    window.location.href = 'http://127.0.0.1:8051/';
+                    window.location.href = 'http://127.0.0.1:8056/';
                 } else {
                     // Show error in popup
                     showError(result.message || 'Invalid email or password');
