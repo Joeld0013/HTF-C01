@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal | NexaCorp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="emp.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Top Navigation Bar -->
+        <!-- Top Navigation -->
+<nav class="top-nav">
+    <div class="brand">
+        <div class="logo-design">
+            <div class="logo-shape shape1"></div>
+            <div class="logo-shape shape2"></div>
+            <div class="logo-shape shape3"></div>
+        </div>
+        <span class="company-name">BuildRight Constructions</span>
+    </div>
+    <div class="nav-actions">
+        <div class="profile-dropdown">
+            <div class="profile-circle">
+                <div class="profile-initials">WC</div>
+                <div class="profile-status online"></div>
+            </div>
+            <div class="dropdown-menu">
+                <div class="profile-preview">
+                    <div class="preview-header">
+                        <div class="preview-circle">
+                            <div class="preview-initials">WC</div>
+                        </div>
+                        <div class="preview-info">
+                            <h4 class="preview-name">Worker Name</h4>
+                            <span class="preview-designation">Construction Worker</span>
+                        </div>
+                    </div>
+                    <div class="preview-details">
+                        <div class="detail-item">
+                            <i class="fas fa-envelope"></i>
+                            <span class="detail-value">worker@buildright.com</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone"></i>
+                            <span class="detail-value">+1 (555) 123-4567</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-hard-hat"></i>
+                            <span class="detail-value">5 years experience</span>
+                        </div>
+                    </div>
+                    <button class="btn full-profile-btn" id="viewFullProfileBtn">
+                        <i class="fas fa-user-circle"></i> View Full Profile
+                    </button>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="settingsBtn"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Full Profile Modal -->
+<div id="fullProfileModal" class="modal">
+    <div class="modal-content profile-modal">
+        <span class="close">&times;</span>
+        <h3>Worker Profile</h3>
+        <div class="profile-content">
+            <div class="profile-photo-section">
+                <div class="modal-profile-circle">
+                    <div class="modal-profile-initials">WC</div>
+                </div>
+                <button class="btn upload-photo-btn">
+                    <i class="fas fa-camera"></i> Upload Photo
+                </button>
+            </div>
+            <div class="profile-details">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" value="Worker Name" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Employee ID</label>
+                    <input type="text" value="BRC-2023-0456" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Designation</label>
+                    <input type="text" value="Construction Worker" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <input type="text" value="Male" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="text" value="32" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Experience</label>
+                    <input type="text" value="5 years" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" value="worker@buildright.com" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" value="+1 (555) 123-4567" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact</label>
+                    <input type="text" value="Jane Doe (+1 555 987-6543)" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn edit-profile-btn" id="editProfileBtn">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+        </div>
+    </div>
+</div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Side Navigation -->
+            <aside class="side-nav">
+                <ul class="nav-menu">
+                    <li class="active">
+                        <a href="#overview">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#attendance">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#leaves">
+                            <i class="fas fa-umbrella-beach"></i>
+                            <span>Leaves</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#performance">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Performance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#documents">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Documents</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Content Sections -->
+            <div class="content-sections">
+                <!-- Overview Section -->
+                <section id="overview" class="content-section active-section">
+                    <div class="section-header">
+                        <h2>Dashboard Overview</h2>
+                        <div class="date-filter">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>June 2023</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <!-- Weather Card -->
+                        <div class="stat-card weather-card">
+                            <div class="weather-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="weather-details">
+                                <h3>Good Morning, John</h3>
+                                <div class="weather-info">
+                                    <span class="temp">28°C</span>
+                                    <span class="location">Sunny, New York</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Schedule -->
+                        <div class="stat-card schedule-card">
+                            <h3>Today's Schedule</h3>
+                            <ul class="schedule-list">
+                                <li>
+                                    <span class="time">09:30 AM</span>
+                                    <span class="event">Team Standup</span>
+                                </li>
+                                <li>
+                                    <span class="time">11:00 AM</span>
+                                    <span class="event">Client Meeting</span>
+                                </li>
+                                <li>
+                                    <span class="time">02:00 PM</span>
+                                    <span class="event">Project Review</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="stat-card quick-actions">
+                            <h3>Quick Actions</h3>
+                            <div class="action-buttons">
+                                <button class="action-btn">
+                                    <i class="fas fa-file-upload"></i>
+                                    <span>Submit Report</span>
+                                </button>
+                                <button class="action-btn">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    <span>Request Leave</span>
+                                </button>
+                                <button class="action-btn">
+                                    <i class="fas fa-expand"></i>
+                                    <span>Check-in</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Performance Graph -->
+                        <div class="stat-card graph-card">
+                            <div class="graph-header">
+                                <h3>Monthly Performance</h3>
+                                <div class="graph-filter">
+                                    <select>
+                                        <option>This Month</option>
+                                        <option>Last Month</option>
+                                        <option>Quarter</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+
+                        <!-- Attendance Trend -->
+                        <div class="stat-card graph-card">
+                            <div class="graph-header">
+                                <h3>Attendance Trend</h3>
+                                <div class="graph-filter">
+                                    <select>
+                                        <option>Last 6 Months</option>
+                                        <option>This Year</option>
+                                        <option>Last Year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+
+                        <!-- Recent Activities -->
+                        <div class="stat-card activities-card">
+                            <h3>Recent Activities</h3>
+                            <ul class="activities-list">
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Completed project milestone</span>
+                                    <span class="activity-time">2 hours ago</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-comment-alt"></i>
+                                    <span>Received feedback from manager</span>
+                                    <span class="activity-time">1 day ago</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Leave request approved</span>
+                                    <span class="activity-time">2 days ago</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Attendance Section -->
+                <section id="attendance" class="content-section">
+                    <div class="section-header">
+                        <h2>Attendance Records</h2>
+                        <div class="section-actions">
+                            <button class="btn primary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <div class="date-range-picker">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>June 1-30, 2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="attendance-container">
+                        <div class="attendance-summary">
+                            <div class="summary-card">
+                                <h4>Total Present</h4>
+                                <span class="summary-value">22</span>
+                                <span class="summary-label">days</span>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Average Hours</h4>
+                                <span class="summary-value">8.5</span>
+                                <span class="summary-label">hours/day</span>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Overtime</h4>
+                                <span class="summary-value">12.5</span>
+                                <span class="summary-label">hours</span>
+                            </div>
+                            <div class="summary-card">
+                                <h4>Late Arrivals</h4>
+                                <span class="summary-value">3</span>
+                                <span class="summary-label">days</span>
+                            </div>
+                        </div>
+
+                        <div class="attendance-table-container">
+                            <table class="attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Day</th>
+                                        <th>Check In</th>
+                                        <th>Check Out</th>
+                                        <th>Working Hours</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Leaves Section -->
+                <section id="leaves" class="content-section">
+                    <div class="section-header">
+                        <h2>Leave Management</h2>
+                        <button class="btn primary">
+                            <i class="fas fa-plus"></i> New Request
+                        </button>
+                    </div>
+
+                    <div class="leaves-container">
+                        <div class="leave-balance-cards">
+                            <div class="balance-card">
+                                <div class="balance-icon annual">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div class="balance-details">
+                                    <h4>Annual Leave</h4>
+                                    <div class="balance-meter">
+                                        <div class="meter-fill" style="width: 60%;"></div>
+                                    </div>
+                                    <span class="balance-text">12/20 days remaining</span>
+                                </div>
+                            </div>
+
+                            <div class="balance-card">
+                                <div class="balance-icon sick">
+                                    <i class="fas fa-procedures"></i>
+                                </div>
+                                <div class="balance-details">
+                                    <h4>Sick Leave</h4>
+                                    <div class="balance-meter">
+                                        <div class="meter-fill" style="width: 40%;"></div>
+                                    </div>
+                                    <span class="balance-text">6/10 days remaining</span>
+                                </div>
+                            </div>
+
+                            <div class="balance-card">
+                                <div class="balance-icon personal">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <div class="balance-details">
+                                    <h4>Personal Leave</h4>
+                                    <div class="balance-meter">
+                                        <div class="meter-fill" style="width: 20%;"></div>
+                                    </div>
+                                    <span class="balance-text">1/5 days remaining</span>
+                                </div>
+                            </div>
+
+                            <div class="balance-card">
+                                <div class="balance-icon parental">
+                                    <i class="fas fa-baby"></i>
+                                </div>
+                                <div class="balance-details">
+                                    <h4>Parental Leave</h4>
+                                    <div class="balance-meter">
+                                        <div class="meter-fill" style="width: 33%;"></div>
+                                    </div>
+                                    <span class="balance-text">30/90 days remaining</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="leave-history-container">
+                            <h3>Recent Leave Applications</h3>
+                            <table class="leave-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Leave Type</th>
+                                        <th>Dates</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Performance Section -->
+                <section id="performance" class="content-section">
+                    <div class="section-header">
+                        <h2>Performance Dashboard</h2>
+                        <div class="performance-period">
+                            <span>Q2 2023 Performance Review</span>
+                        </div>
+                    </div>
+
+                    <div class="performance-container">
+                        <div class="performance-scorecard">
+                            <div class="scorecard-header">
+                                <h3>Your Overall Score</h3>
+                                <div class="score-rating">
+                                    <span class="score">4.2</span>
+                                    <span class="rating">/5.0</span>
+                                    <span class="rating-label">Excellent</span>
+                                </div>
+                            </div>
+
+                            <div class="scorecard-details">
+                                <div class="score-metric">
+                                    <div class="metric-info">
+                                        <span class="metric-label">Quality of Work</span>
+                                        <span class="metric-value">4.5</span>
+                                    </div>
+                                    <div class="metric-bar">
+                                        <div class="bar-fill" style="width: 90%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="score-metric">
+                                    <div class="metric-info">
+                                        <span class="metric-label">Productivity</span>
+                                        <span class="metric-value">4.3</span>
+                                    </div>
+                                    <div class="metric-bar">
+                                        <div class="bar-fill" style="width: 86%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="score-metric">
+                                    <div class="metric-info">
+                                        <span class="metric-label">Teamwork</span>
+                                        <span class="metric-value">4.0</span>
+                                    </div>
+                                    <div class="metric-bar">
+                                        <div class="bar-fill" style="width: 80%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="score-metric">
+                                    <div class="metric-info">
+                                        <span class="metric-label">Initiative</span>
+                                        <span class="metric-value">4.1</span>
+                                    </div>
+                                    <div class="metric-bar">
+                                        <div class="bar-fill" style="width: 82%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="performance-graphs">
+                            <div class="graph-container">
+                                <h3>Quarterly Performance Trend</h3>
+                                <canvas id="quarterlyPerformanceChart"></canvas>
+                            </div>
+
+                            <div class="graph-container">
+                                <h3>Goal Completion</h3>
+                                <canvas id="goalsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="performance-feedback">
+                            <h3>Recent Feedback</h3>
+                            <div class="feedback-card">
+                                <div class="feedback-header">
+                                    <img src="https://via.placeholder.com/40" alt="Manager" class="feedback-avatar">
+                                    <div class="feedback-meta">
+                                        <span class="feedback-author">Sarah Johnson</span>
+                                        <span class="feedback-role">Team Lead</span>
+                                        <span class="feedback-date">June 15, 2023</span>
+                                    </div>
+                                </div>
+                                <div class="feedback-content">
+                                    <p>John has shown exceptional problem-solving skills in the recent project. His ability to troubleshoot complex issues has been invaluable to the team. He consistently meets deadlines and maintains high-quality standards in his deliverables.</p>
+                                </div>
+                                <div class="feedback-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="emp.js"></script>
+</body>
+</html>
